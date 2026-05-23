@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔍 Visibility Culling Feature</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #313338;
+      color: #dbdee1;
+      font-family: 'gg sans', 'Noto Sans', Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.375;
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #2b2d31;
+      border-right: 1px solid #1e1f22;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 10;
+    }
+    .sidebar-header {
+      padding: 8px 16px 16px;
+      border-bottom: 1px solid #3f4147;
+      margin-bottom: 8px;
+    }
+    .sidebar-header img { width: 64px; display: block; image-rendering: pixelated; transition: transform 0.15s; }
+    .sidebar-header a:hover img { transform: scale(1.1); }
+    .sidebar-header p { font-size: 11px; color: #80848e; margin-top: 2px; }
+    .nav-item {
+      display: block;
+      padding: 5px 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 1px 8px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .nav-item:hover { background: #35373c; color: #f2f3f5; }
+    .nav-item.active { background: #404249; color: #f2f3f5; }
+    .nav-section {
+      font-size: 11px;
+      font-weight: 700;
+      color: #80848e;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 12px 16px 4px;
+    }
+    main { margin-left: 240px; padding: 32px 48px 64px; max-width: 960px; }
+    .page-title { font-size: 28px; font-weight: 700; color: #f2f3f5; margin-bottom: 4px; }
+    .page-subtitle {
+      color: #80848e;
+      font-size: 15px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #3f4147;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f2f3f5;
+      margin: 36px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #3f4147;
+      scroll-margin-top: 24px;
+    }
+    h3 { font-size: 15px; font-weight: 600; color: #dbdee1; margin: 20px 0 8px; }
+    p { color: #b5bac1; font-size: 15px; line-height: 1.6; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+    thead tr { background: #2b2d31; }
+    th {
+      text-align: left;
+      padding: 9px 14px;
+      color: #80848e;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid #3f4147;
+    }
+    td { padding: 8px 14px; border-bottom: 1px solid #2e3035; color: #dbdee1; }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: #949cf7; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; }
+    tbody tr:hover { background: #2e3035; }
+    code {
+      background: #2b2d31;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Andale Mono', 'Courier New', monospace;
+      font-size: 85%;
+      color: #f2f3f5;
+    }
+    .code-block {
+      background: #1e1f22;
+      border-radius: 6px;
+      margin: 10px 0 18px;
+      overflow: hidden;
+      border: 1px solid #111214;
+    }
+    .code-header {
+      background: #232428;
+      padding: 7px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #111214;
+    }
+    .code-lang { font-size: 12px; font-weight: 700; color: #949cf7; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    .code-file { font-size: 12px; color: #5c5f66; font-family: monospace; }
+    pre {
+      padding: 14px 0;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Andale Mono', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #dbdee1;
+    }
+    pre .line { display: block; padding: 0 16px; }
+    .kw  { color: #c678dd; }
+    .fn  { color: #61afef; }
+    .cm  { color: #5c6370; font-style: italic; }
+    .str { color: #98c379; }
+    .num { color: #d19a66; }
+    .add { display: block; color: #57f287; background: rgba(87, 242, 135, 0.1); padding: 0 16px; }
+    .pp  { color: #c678dd; }
+    .note {
+      background: #1e1f22;
+      border-left: 3px solid #5865f2;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 8px 0 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      line-height: 1.6;
+    }
+    .note strong { color: #f2f3f5; }
+    .warn {
+      background: #1e1f22;
+      border-left: 3px solid #f0b232;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 8px 0 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      line-height: 1.6;
+    }
+    .warn strong { color: #f2f3f5; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #2b2d31; }
+    ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      main { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <a href="index.html"><img src="mario.png" alt="Mario Pro2 Home" /></a>
+    <p>Dev notes</p>
+  </div>
+  <span class="nav-section">Finder Feature</span>
+  <a class="nav-item active" href="#overview">Overview</a>
+  <a class="nav-item" href="#files">Files Modified</a>
+  <a class="nav-item" href="#finder-hh">1. finder.hh</a>
+  <a class="nav-item" href="#game-hh">2. game.hh</a>
+  <a class="nav-item" href="#game-cc">3. game.cc</a>
+  <a class="nav-item" href="#optimization">Optimization Check</a>
+</nav>
+
+<main>
+  <p class="page-title" id="overview">🔍 Visibility Culling Feature</p>
+  <p class="page-subtitle">Implementation guide for adding a spatial grid finder to skip off-screen objects.</p>
+
+  <h2 id="files">Files Modified</h2>
+  <table>
+    <thead><tr><th>File</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>finder.hh</td><td>Spatial grid template class</td></tr>
+      <tr><td>game.hh</td><td>Added <code>platform_finder_</code> member</td></tr>
+      <tr><td>game.cc</td><td>Constructor, <code>update_objects</code> and <code>paint</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="finder-hh">1. finder.hh — Spatial Grid</h2>
+  <p>A generic template class that maps objects to grid cells. Only objects in cells that overlap the query rect are returned.</p>
+
+  <h3>Private</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">finder.hh — private</span></div>
+    <pre><span class="line"><span class="kw">private</span>:</span><span class="line">    <span class="kw">const int</span> cellSize = <span class="num">40</span>;</span><span class="line">    std::map&lt;std::pair&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt;, std::set&lt;<span class="kw">const</span> T*&gt;&gt; grid;</span><span class="line"> </span><span class="line">    <span class="kw">void</span> <span class="fn">gridRange</span>(<span class="kw">const</span> pro2::Rect&amp; element_rect, pro2::Rect&amp; tiles) <span class="kw">const</span> {</span><span class="line">        tiles.bottom = <span class="fn">floor</span>(element_rect.bottom / cellSize);</span><span class="line">        tiles.top    = <span class="fn">floor</span>(element_rect.top    / cellSize);</span><span class="line">        tiles.left   = <span class="fn">floor</span>(element_rect.left   / cellSize);</span><span class="line">        tiles.right  = <span class="fn">floor</span>(element_rect.right  / cellSize);</span><span class="line">    }</span></pre>
+  </div>
+
+  <h3>Public</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">finder.hh — public</span></div>
+    <pre><span class="line"><span class="kw">public</span>:</span><span class="line">    <span class="fn">Finder</span>() {}</span><span class="line"> </span><span class="line">    <span class="kw">void</span> <span class="fn">add</span>(<span class="kw">const</span> T* t) {</span><span class="line">        pro2::Rect tiles;</span><span class="line">        <span class="fn">gridRange</span>(t-&gt;<span class="fn">get_rect</span>(), tiles);</span><span class="line">        <span class="kw">for</span> (<span class="kw">int</span> y = tiles.top; y &lt;= tiles.bottom; ++y)</span><span class="line">            <span class="kw">for</span> (<span class="kw">int</span> x = tiles.left; x &lt;= tiles.right; ++x)</span><span class="line">                grid[{x, y}].<span class="fn">insert</span>(t);</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">void</span> <span class="fn">remove</span>(<span class="kw">const</span> T* t) {</span><span class="line">        pro2::Rect tiles;</span><span class="line">        <span class="fn">gridRange</span>(t-&gt;<span class="fn">get_rect</span>(), tiles);</span><span class="line">        <span class="kw">for</span> (<span class="kw">int</span> y = tiles.top; y &lt;= tiles.bottom; ++y) {</span><span class="line">            <span class="kw">for</span> (<span class="kw">int</span> x = tiles.left; x &lt;= tiles.right; ++x) {</span><span class="line">                <span class="kw">auto</span> it = grid.<span class="fn">find</span>({x, y});</span><span class="line">                <span class="kw">if</span> (it != grid.<span class="fn">end</span>()) {</span><span class="line">                    it-&gt;second.<span class="fn">erase</span>(t);</span><span class="line">                    <span class="kw">if</span> (it-&gt;second.<span class="fn">empty</span>()) grid.<span class="fn">erase</span>(it);</span><span class="line">                }</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">void</span> <span class="fn">update</span>(<span class="kw">const</span> T* t) {</span><span class="line">        <span class="fn">remove</span>(t);</span><span class="line">        <span class="fn">add</span>(t);</span><span class="line">    }</span><span class="line"> </span><span class="line">    std::set&lt;<span class="kw">const</span> T*&gt; <span class="fn">query</span>(pro2::Rect window_rect) <span class="kw">const</span> {</span><span class="line">        std::set&lt;<span class="kw">const</span> T*&gt; result;</span><span class="line">        pro2::Rect tiles;</span><span class="line">        <span class="fn">gridRange</span>(window_rect, tiles);</span><span class="line">        <span class="kw">for</span> (<span class="kw">int</span> y = tiles.top; y &lt;= tiles.bottom; ++y)</span><span class="line">            <span class="kw">for</span> (<span class="kw">int</span> x = tiles.left; x &lt;= tiles.right; ++x) {</span><span class="line">                <span class="kw">auto</span> it = grid.<span class="fn">find</span>({x, y});</span><span class="line">                <span class="kw">if</span> (it != grid.<span class="fn">end</span>())</span><span class="line">                    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; p : it-&gt;second)</span><span class="line">                        result.<span class="fn">insert</span>(p);</span><span class="line">            }</span><span class="line">        <span class="kw">return</span> result;</span><span class="line">    }</span></pre>
+  </div>
+  <div class="note"><strong>Note:</strong> <code>query</code> runs in O(k log n) where k is the number of cells in the query window. For a fixed-size camera viewport, k is constant, making it effectively O(log n).</div>
+
+  <h2 id="game-hh">2. game.hh — Add platform_finder_</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">game.hh</span></div>
+    <pre><span class="line"><span class="pp">#include</span> <span class="str">"finder.hh"</span></span><span class="line"> </span><span class="line"><span class="kw">class</span> <span class="fn">Game</span> {</span><span class="line">    Mario                 mario_;</span><span class="line">    std::vector&lt;Platform&gt; platforms_;</span><span class="line">    <span class="kw">int</span>                   score_;</span><span class="line">    std::vector&lt;Coin&gt;     coins_;</span><span class="add">    Finder&lt;Platform&gt;      platform_finder_;   <span class="cm">// new</span></span><span class="line">    ...</span><span class="line">};</span></pre>
+  </div>
+  <div class="note"><strong>Note:</strong> <code>coin_finder_</code> is intentionally omitted — coins are few enough that a manual <code>overlaps</code> check per frame is fast, and mutation (collecting coins) is cleaner without <code>const_cast</code>.</div>
+
+  <h2 id="game-cc">3. game.cc — Game Loop Integration</h2>
+
+  <h3>Constructor</h3>
+  <p>Register all platforms into the finder after the push_back loop finishes, to avoid pointer invalidation from vector reallocation:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">game.cc — constructor</span></div>
+    <pre><span class="line">    <span class="cm">// after the push_back loop:</span></span><span class="add">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; p : platforms_) platform_finder_.<span class="fn">add</span>(&amp;p);</span></pre>
+  </div>
+
+  <h3>update_objects</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">game.cc — update_objects</span></div>
+    <pre><span class="line"><span class="kw">void</span> Game::<span class="fn">update_objects</span>(pro2::Window&amp; window) {</span><span class="line">    <span class="cm">// platforms: query only nearby ones for physics</span></span><span class="line">    std::vector&lt;Platform&gt; nearby;</span><span class="line">    Rect aux = mario_.<span class="fn">get_rect</span>();</span><span class="line">    aux.left -= <span class="num">480</span>; aux.right += <span class="num">480</span>;</span><span class="line">    aux.top  -= <span class="num">480</span>; aux.bottom += <span class="num">480</span>;</span><span class="add">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(aux))</span><span class="add">        nearby.<span class="fn">push_back</span>(*p);</span><span class="add">    mario_.<span class="fn">update</span>(window, nearby);</span><span class="line"> </span><span class="line">    <span class="cm">// coins: manual loop — visible only</span></span><span class="line">    Rect mariorect = mario_.<span class="fn">get_rect</span>();</span><span class="line">    Rect visible   = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (Coin&amp; c : coins_) {</span><span class="line">        <span class="kw">if</span> (!c.<span class="fn">is_collected</span>() &amp;&amp; <span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), visible)) {</span><span class="line">            c.<span class="fn">update</span>(window.<span class="fn">frame_count</span>());</span><span class="line">            <span class="kw">if</span> (<span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), mariorect)) {</span><span class="line">                c.<span class="fn">collect</span>();</span><span class="line">                std::cout &lt;&lt; <span class="str">"You have "</span> &lt;&lt; score_++ &lt;&lt; <span class="str">" coins.\n"</span>;</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line">}</span></pre>
+  </div>
+
+  <h3>paint</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">game.cc — paint</span></div>
+    <pre><span class="line"><span class="kw">void</span> Game::<span class="fn">paint</span>(pro2::Window&amp; window) {</span><span class="line">    window.<span class="fn">clear</span>(sky_blue);</span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line"> </span><span class="add">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(visible))</span><span class="add">        p-&gt;<span class="fn">paint</span>(window);</span><span class="line"> </span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Coin&amp; c : coins_)</span><span class="line">        <span class="kw">if</span> (!c.<span class="fn">is_collected</span>() &amp;&amp; <span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), visible))</span><span class="line">            c.<span class="fn">paint_coin</span>(window);</span><span class="line"> </span><span class="line">    mario_.<span class="fn">paint</span>(window);</span><span class="line">}</span></pre>
+  </div>
+
+  <h2 id="optimization">Optimization Check</h2>
+  <p>We can manually verify the optimization by setting the loop limit to <code>500000</code>:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">C++</span><span class="code-file">game.cc — constructor</span></div>
+    <pre><span class="line"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; <span class="num">500000</span>; i++) {</span><span class="line">    platforms_.<span class="fn">push_back</span>(<span class="fn">Platform</span>(<span class="num">250</span> + i * <span class="num">200</span>, <span class="num">400</span> + i * <span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="line">    coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span>,      <span class="num">140</span>}));</span><span class="line">    coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> - <span class="num">60</span>, <span class="num">140</span>}));</span><span class="line">    coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> + <span class="num">60</span>, <span class="num">140</span>}));</span><span class="line">}</span></pre>
+  </div>
+  <div class="warn"><strong>Without the finder:</strong> every frame iterates all 1.5M coins — the game becomes unplayable.</div>
+  <div class="note"><strong>With the finder:</strong> only the ~20 objects near Mario are queried per frame, regardless of total count. The game runs smoothly at 500k platforms and 1.5M coins.</div>
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('h2[id], p[id]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
