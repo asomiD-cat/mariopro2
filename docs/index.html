@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mario Pro2 — Dev Notes</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #313338;
+      color: #dbdee1;
+      font-family: 'gg sans', 'Noto Sans', Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #f2f3f5;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: #80848e;
+      font-size: 15px;
+    }
+    .cards {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 640px;
+      width: 100%;
+    }
+    .card {
+      background: #2b2d31;
+      border: 1px solid #1e1f22;
+      border-radius: 8px;
+      padding: 24px 28px;
+      flex: 1;
+      min-width: 240px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      cursor: pointer;
+    }
+    .card:hover {
+      background: #35373c;
+      border-color: #5865f2;
+      transform: translateY(-2px);
+    }
+    .card-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5865f2;
+      margin-bottom: 10px;
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f2f3f5;
+      margin-bottom: 6px;
+    }
+    .card p {
+      font-size: 14px;
+      color: #80848e;
+      line-height: 1.5;
+    }
+    .card.wip {
+      opacity: 0.6;
+      cursor: default;
+      pointer-events: none;
+    }
+    .card.wip .card-tag { color: #f0b232; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-top: 14px;
+    }
+    .badge-done { background: #1a472a; color: #57f287; }
+    .badge-wip  { background: #3d2f0a; color: #f0b232; }
+    .footer {
+      margin-top: 48px;
+      font-size: 13px;
+      color: #4e5058;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Mario Pro2</h1>
+    <p>Dev notes — feature implementation guides</p>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="part1.html">
+      <div class="card-tag">Part 1</div>
+      <h2>🪙 Coin Collection</h2>
+      <p>Sprite rendering, hitbox collision, score tracking, and the static member pitfall.</p>
+      <span class="badge badge-done">Done</span>
+    </a>
+
+    <div class="card wip">
+      <div class="card-tag">Part 2</div>
+      <h2>🔍 Finder</h2>
+      <p>Coming soon.</p>
+      <span class="badge badge-wip">In progress</span>
+    </div>
+  </div>
+
+  <p class="footer">Mario Pro2 · PRO2 Project</p>
+</body>
+</html>

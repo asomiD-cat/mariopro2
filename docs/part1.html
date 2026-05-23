@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪙 Coin Collection Feature</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #313338;
+      color: #dbdee1;
+      font-family: 'gg sans', 'Noto Sans', Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.375;
+      min-height: 100vh;
+    }
+
+    /* ── layout ── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #2b2d31;
+      border-right: 1px solid #1e1f22;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 10;
+    }
+    .sidebar-header {
+      padding: 8px 16px 16px;
+      border-bottom: 1px solid #3f4147;
+      margin-bottom: 8px;
+    }
+    .sidebar-header h2 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #949cf7;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .sidebar-header p {
+      font-size: 11px;
+      color: #80848e;
+      margin-top: 2px;
+    }
+    .nav-item {
+      display: block;
+      padding: 5px 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 1px 8px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .nav-item:hover { background: #35373c; color: #f2f3f5; }
+    .nav-item.active { background: #404249; color: #f2f3f5; }
+    .nav-section {
+      font-size: 11px;
+      font-weight: 700;
+      color: #80848e;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 12px 16px 4px;
+    }
+
+    main {
+      margin-left: 240px;
+      padding: 32px 48px 64px;
+      max-width: 960px;
+    }
+
+    /* ── typography ── */
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f2f3f5;
+      margin-bottom: 4px;
+    }
+    .page-subtitle {
+      color: #80848e;
+      font-size: 15px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #3f4147;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f2f3f5;
+      margin: 36px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #3f4147;
+      scroll-margin-top: 24px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #dbdee1;
+      margin: 20px 0 8px;
+    }
+    p { color: #b5bac1; font-size: 15px; line-height: 1.6; margin-bottom: 10px; }
+
+    /* ── table ── */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+    thead tr { background: #2b2d31; }
+    th {
+      text-align: left;
+      padding: 9px 14px;
+      color: #80848e;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid #3f4147;
+    }
+    td { padding: 8px 14px; border-bottom: 1px solid #2e3035; color: #dbdee1; }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: #949cf7; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; }
+    tbody tr:hover { background: #2e3035; }
+
+    /* ── code ── */
+    code {
+      background: #2b2d31;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Andale Mono', 'Courier New', monospace;
+      font-size: 85%;
+      color: #f2f3f5;
+    }
+    .code-block {
+      background: #1e1f22;
+      border-radius: 6px;
+      margin: 10px 0 18px;
+      overflow: hidden;
+      border: 1px solid #111214;
+    }
+    .code-header {
+      background: #232428;
+      padding: 7px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #111214;
+    }
+    .code-lang { font-size: 12px; font-weight: 700; color: #949cf7; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    .code-file { font-size: 12px; color: #5c5f66; font-family: monospace; }
+    pre {
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Andale Mono', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #dbdee1;
+    }
+    .kw  { color: #c678dd; }
+    .fn  { color: #61afef; }
+    .cm  { color: #5c6370; font-style: italic; }
+    .str { color: #98c379; }
+    .num { color: #d19a66; }
+    .add { color: #57f287; }
+    .pp  { color: #c678dd; }
+
+    /* ── callouts ── */
+    .note {
+      background: #1e1f22;
+      border-left: 3px solid #5865f2;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 8px 0 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      line-height: 1.6;
+    }
+    .note strong { color: #f2f3f5; }
+    .warn {
+      background: #1e1f22;
+      border-left: 3px solid #f0b232;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 8px 0 16px;
+      font-size: 14px;
+      color: #b5bac1;
+      line-height: 1.6;
+    }
+    .warn strong { color: #f2f3f5; }
+
+    /* ── scrollbar ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #2b2d31; }
+    ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      main { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <h2>Mario Pro2</h2>
+    <p>Dev notes</p>
+  </div>
+  <span class="nav-section">Coin Feature</span>
+  <a class="nav-item active" href="#overview">Overview</a>
+  <a class="nav-item" href="#files">Files Modified</a>
+  <a class="nav-item" href="#coin-hh">1. coin.hh</a>
+  <a class="nav-item" href="#coin-cc">2. coin.cc</a>
+  <a class="nav-item" href="#mario-hh">3. mario.hh</a>
+  <a class="nav-item" href="#geometry-hh">4. geometry.hh</a>
+  <a class="nav-item" href="#game-hh">5. game.hh</a>
+  <a class="nav-item" href="#game-cc">6. game.cc</a>
+</nav>
+
+<main>
+  <p class="page-title" id="overview">🪙 Coin Collection Feature</p>
+  <p class="page-subtitle">Implementation guide for adding collectible coins to the Mario game.</p>
+
+  <h2 id="files">Files Modified</h2>
+  <table>
+    <thead><tr><th>File</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>coin.hh</td><td>Coin class definition</td></tr>
+      <tr><td>coin.cc</td><td>Sprite pixel data</td></tr>
+      <tr><td>mario.hh</td><td>Hitbox for Mario</td></tr>
+      <tr><td>geometry.hh</td><td>Collision detection</td></tr>
+      <tr><td>game.hh</td><td>Score &amp; coin storage</td></tr>
+      <tr><td>game.cc</td><td>Game loop integration</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="coin-hh">1. coin.hh — Coin Class</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">cpp</span><span class="code-file">coin.hh</span></div>
+    <pre><span class="pp">#ifndef</span> COIN_HH
+<span class="pp">#define</span> COIN_HH
+
+<span class="pp">#include</span> <span class="str">&lt;vector&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;cmath&gt;</span>        <span class="cm">// sin()</span>
+<span class="pp">#include</span> <span class="str">"geometry.hh"</span>
+<span class="pp">#include</span> <span class="str">"window.hh"</span>
+<span class="pp">#include</span> <span class="str">"utils.hh"</span>
+
+<span class="kw">class</span> <span class="fn">Coin</span> {
+<span class="kw">private</span>:
+    <span class="kw">static const</span> std::vector&lt;std::vector&lt;<span class="kw">int</span>&gt;&gt; coin_sprite_;
+    pro2::Pt pos_;
+    <span class="kw">double</span>   initial_y;
+    <span class="kw">bool</span>     collected_;
+
+<span class="kw">public</span>:
+    <span class="fn">Coin</span>(pro2::Pt pos) : pos_(pos), collected_(<span class="kw">false</span>), initial_y(pos.y) {}
+
+    <span class="kw">void</span> <span class="fn">update</span>(<span class="kw">int</span> frame_count) {
+        pos_.y = initial_y + (<span class="num">3</span> * <span class="fn">sin</span>(frame_count) * <span class="num">0.001</span>);
+    }
+
+    <span class="kw">void</span> <span class="fn">collect</span>() { collected_ = <span class="kw">true</span>; }
+
+    <span class="kw">void</span> <span class="fn">paint_coin</span>(pro2::Window&amp; window) <span class="kw">const</span> {
+        pro2::<span class="fn">paint_sprite</span>(window, pos_, coin_sprite_, <span class="kw">false</span>);
+    }
+
+    <span class="kw">bool</span> <span class="fn">is_collected</span>() <span class="kw">const</span> { <span class="kw">return</span> collected_; }
+
+    pro2::Rect <span class="fn">get_rect</span>() <span class="kw">const</span> {
+        <span class="cm">// {left, top, right, bottom}</span>
+        <span class="kw">return</span> {pos_.x - <span class="num">4</span>, pos_.y - <span class="num">4</span>, pos_.x + <span class="num">4</span>, pos_.y + <span class="num">4</span>};
+    }
+};
+
+<span class="pp">#endif</span></pre>
+  </div>
+
+  <h2 id="coin-cc">2. coin.cc — Sprite Pixel Data</h2>
+  <p>The sprite is an 8×8 pixel coin. Color constants are file-local.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">cpp</span><span class="code-file">coin.cc</span></div>
+    <pre><span class="pp">#include</span> <span class="str">&lt;vector&gt;</span>
+<span class="pp">#include</span> <span class="str">"window.hh"</span>
+<span class="pp">#include</span> <span class="str">"coin.hh"</span>
+
+<span class="kw">const int</span> b = pro2::black;
+<span class="kw">const int</span> m = <span class="num">0x5c4033</span>;    <span class="cm">// dark brown (shading)</span>
+<span class="kw">const int</span> y = pro2::yellow;
+<span class="kw">const int</span> _ = <span class="num">0x5c94fc</span>;    <span class="cm">// sky blue (transparent)</span>
+
+<span class="kw">const</span> std::vector&lt;std::vector&lt;<span class="kw">int</span>&gt;&gt; Coin::coin_sprite_ = {
+    {_, _, b, b, b, b, _, _},
+    {_, b, y, y, y, y, b, _},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {_, b, y, y, y, y, b, _},
+    {_, _, b, b, b, b, _, _},
+};</pre>
+  </div>
+  <div class="note"><strong>Note:</strong> The static member must be defined in exactly one <code>.cc</code> file using the <code>Coin::</code> scope qualifier, otherwise the linker will produce an <em>undefined reference</em> error.</div>
+
+  <h2 id="mario-hh">3. mario.hh — Mario Hitbox</h2>
+  <p>Add <code>get_rect()</code> so Mario's position can be tested for coin overlap:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">mario.hh</span></div>
+    <pre>  <span class="kw">void</span> <span class="fn">update</span>(pro2::Window&amp; window, <span class="kw">const</span> std::vector&lt;Platform&gt;&amp; platforms);
+
+<span class="add">+ pro2::Rect <span class="fn">get_rect</span>() <span class="kw">const</span> {
++     <span class="cm">// {left, top, right, bottom}</span>
++     <span class="kw">return</span> {pos_.x - <span class="num">6</span>, pos_.y - <span class="num">15</span>, pos_.x + <span class="num">6</span>, pos_.y};
++ }</span></pre>
+  </div>
+
+  <h2 id="geometry-hh">4. geometry.hh — Collision Detection</h2>
+  <p>Uses the separating axis approach: two rectangles overlap unless separated on any axis.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">geometry.hh</span></div>
+    <pre>  <span class="kw">struct</span> Rect {
+      <span class="kw">int</span> left, top, right, bottom;
+  };
+
+<span class="add">+ <span class="kw">inline bool</span> <span class="fn">overlaps</span>(<span class="kw">const</span> Rect&amp; a, <span class="kw">const</span> Rect&amp; b) {
++     <span class="kw">return</span> !(a.right  &lt; b.left  ||
++              a.left   &gt; b.right ||
++              a.bottom &lt; b.top   ||
++              a.top    &gt; b.bottom);
++ }</span></pre>
+  </div>
+
+  <h2 id="game-hh">5. game.hh — Score &amp; Coin Storage</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">game.hh</span></div>
+    <pre>  <span class="kw">class</span> <span class="fn">Game</span> {
+      Mario                 mario_;
+      std::vector&lt;Platform&gt; platforms_;
+<span class="add">+     <span class="kw">int</span>                   score_;
++     std::vector&lt;Coin&gt;     coins_;</span>
+      ...
+  };</pre>
+  </div>
+
+  <h2 id="game-cc">6. game.cc — Game Loop Integration</h2>
+
+  <h3>Constructor</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">game.cc</span></div>
+    <pre><span class="add">+     finished_(<span class="kw">false</span>),
++     score_(<span class="num">1</span>)    <span class="cm">// post-increment: prints 1 on first coin, 2 on second...</span></span>
+      {
+      <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; <span class="num">20</span>; i++) {
+          platforms_.<span class="fn">push_back</span>(<span class="fn">Platform</span>(<span class="num">250</span> + i*<span class="num">200</span>, <span class="num">400</span> + i*<span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));
+<span class="add">+         coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i*<span class="num">200</span>,      <span class="num">140</span>}));
++         coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i*<span class="num">200</span> - <span class="num">60</span>, <span class="num">140</span>}));
++         coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i*<span class="num">200</span> + <span class="num">60</span>, <span class="num">140</span>}));</span>
+      }
+  }</pre>
+  </div>
+
+  <h3>update_objects</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">game.cc</span></div>
+    <pre>  <span class="kw">void</span> Game::<span class="fn">update_objects</span>(pro2::Window&amp; window) {
+      mario_.<span class="fn">update</span>(window, platforms_);
+<span class="add">+     <span class="kw">auto</span> mariorect = mario_.<span class="fn">get_rect</span>();
+
++     <span class="kw">for</span> (<span class="kw">auto</span>&amp; c : coins_) {          <span class="cm">// auto&amp; — must be a reference!</span>
++         c.<span class="fn">update</span>(window.<span class="fn">frame_count</span>());
++         <span class="kw">if</span> (<span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), mariorect) &amp;&amp; !c.<span class="fn">is_collected</span>()) {
++             c.<span class="fn">collect</span>();
++             std::cout &lt;&lt; <span class="str">"You have "</span> &lt;&lt; score_++ &lt;&lt; <span class="str">" coins.\n"</span>;
++         }
++     }</span>
+  }</pre>
+  </div>
+  <div class="warn"><strong>Key detail:</strong> Iterating by <code>auto c</code> (value) would copy each coin, so <code>c.collect()</code> would never modify the actual vector element. Always use <code>auto&amp;</code>.</div>
+
+  <h3>paint</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">diff</span><span class="code-file">game.cc</span></div>
+    <pre>  <span class="kw">void</span> Game::<span class="fn">paint</span>(pro2::Window&amp; window) {
+      window.<span class="fn">clear</span>(sky_blue);
+      <span class="kw">for</span> (<span class="kw">const</span> Platform&amp; p : platforms_) p.<span class="fn">paint</span>(window);
+
+<span class="add">+     <span class="kw">for</span> (<span class="kw">const</span> Coin&amp; c : coins_) {
++         <span class="kw">if</span> (!c.<span class="fn">is_collected</span>()) c.<span class="fn">paint_coin</span>(window);
++     }</span>
+
+      mario_.<span class="fn">paint</span>(window);
+  }</pre>
+  </div>
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('h2[id], p[id]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
