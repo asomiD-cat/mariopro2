@@ -311,14 +311,21 @@
             <a class="nav-item active" href="#overview">Overview</a>
             <a class="nav-item" href="#files">Files Modified</a>
             <a class="nav-item" href="#finder-hh">1. finder.hh</a>
-            <a class="nav-item" href="#finder-complexity">2. finder.hh — Final File</a>
+            <a class="nav-item" href="#finder-complexity"
+                >2. finder.hh — Final File</a
+            >
             <a class="nav-item" href="#game-hh">3. game.hh</a>
             <a class="nav-item" href="#game-cc">4. game.cc</a>
+            <a class="nav-item" href="#game-cc-final"
+                >5. game.cc — Final File</a
+            >
             <a class="nav-item" href="#optimization">Optimization Check</a>
         </nav>
 
         <main>
-            <p class="page-title" id="overview">🔍 Visibility Culling Feature</p>
+            <p class="page-title" id="overview">
+                🔍 Visibility Culling Feature
+            </p>
             <p class="page-subtitle">
                 Implementation guide for adding a spatial grid finder to skip
                 off-screen objects.
@@ -343,7 +350,10 @@
                     </tr>
                     <tr>
                         <td>game.cc</td>
-                        <td>Constructor, <code>update_objects</code> and <code>paint</code></td>
+                        <td>
+                            Constructor, <code>update_objects</code> and
+                            <code>paint</code>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -401,7 +411,8 @@
             <h3>Constructor</h3>
             <p>
                 Register all platforms into the finder after the push_back loop
-                finishes, to avoid pointer invalidation from vector reallocation:
+                finishes, to avoid pointer invalidation from vector
+                reallocation:
             </p>
             <div class="code-block">
                 <div class="code-header">
@@ -427,6 +438,15 @@
                     ><span class="code-file">game.cc — paint</span>
                 </div>
                 <pre><span class="line"><span class="kw">void</span> Game::<span class="fn">paint</span>(pro2::Window&amp; window) {</span><span class="line">    window.<span class="fn">clear</span>(sky_blue);</span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line"> </span><span class="add">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(visible))</span><span class="add">        p-&gt;<span class="fn">paint</span>(window);</span><span class="line"> </span><span class="add">    <span class="kw">for</span> (<span class="kw">const</span> Coin* c : coin_finder_.<span class="fn">query</span>(visible))</span><span class="add">        c-&gt;<span class="fn">paint_coin</span>(window);</span><span class="line"> </span><span class="line">    mario_.<span class="fn">paint</span>(window);</span><span class="line">}</span></pre>
+            </div>
+
+            <h2 id="game-cc-final">5. game.cc — Final File</h2>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">C++</span
+                    ><span class="code-file">game.cc</span>
+                </div>
+                <pre><span class="line"><span class="pp">#include</span> <span class="str">"game.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"assert.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"coin.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"geometry.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"platform.hh"</span></span><span class="line"><span class="kw">using namespace</span> pro2;</span><span class="line"> </span><span class="line">Game::<span class="fn">Game</span>(<span class="kw">int</span> width, <span class="kw">int</span> height)</span><span class="line">    : <span class="fn">mario_</span>({width / <span class="num">2</span>, <span class="num">150</span>}),</span><span class="line">      platforms_{</span><span class="line">          <span class="fn">Platform</span>(<span class="num">100</span>, <span class="num">300</span>, <span class="num">200</span>, <span class="num">211</span>),</span><span class="line">          <span class="fn">Platform</span>(<span class="num">0</span>, <span class="num">200</span>, <span class="num">250</span>, <span class="num">261</span>),</span><span class="line">          <span class="fn">Platform</span>(<span class="num">250</span>, <span class="num">400</span>, <span class="num">150</span>, <span class="num">161</span>),</span><span class="line">      },</span><span class="line">      <span class="fn">finished_</span>(<span class="kw">false</span>),</span><span class="line">      <span class="fn">score_</span>(<span class="num">1</span>) {</span><span class="line">    <span class="fn">assert</span>(width &gt; <span class="num">0</span> &amp;&amp; height &gt; <span class="num">0</span>, <span class="str">"L'amplada i l'alcada del joc han de ser positives."</span>);</span><span class="line">    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; <span class="num">20</span>; i++) {</span><span class="line">        platforms_.<span class="fn">push_back</span>(<span class="fn">Platform</span>(<span class="num">250</span> + i * <span class="num">200</span>, <span class="num">400</span> + i * <span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span>,      <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> - <span class="num">60</span>, <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> + <span class="num">60</span>, <span class="num">140</span>}));</span><span class="line">    }</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; p : platforms_) platform_finder_.<span class="fn">add</span>(&amp;p);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; c : coins_)     coin_finder_.<span class="fn">add</span>(&amp;c);</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">process_keys</span>(pro2::Window&amp; window) {</span><span class="line">    <span class="kw">if</span> (window.<span class="fn">is_key_down</span>(Keys::Escape)) {</span><span class="line">        finished_ = <span class="kw">true</span>;</span><span class="line">        <span class="kw">return</span>;</span><span class="line">    }</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">update_objects</span>(pro2::Window&amp; window) {</span><span class="line">    std::vector&lt;Platform&gt; nearby;</span><span class="line">    Rect aux = mario_.<span class="fn">get_rect</span>();</span><span class="line">    aux.left -= <span class="num">480</span>; aux.right += <span class="num">480</span>;</span><span class="line">    aux.top  -= <span class="num">480</span>; aux.bottom += <span class="num">480</span>;</span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(aux))</span><span class="line">        nearby.<span class="fn">push_back</span>(*p);</span><span class="line">    mario_.<span class="fn">update</span>(window, nearby);</span><span class="line"> </span><span class="line">    Rect mariorect = mario_.<span class="fn">get_rect</span>();</span><span class="line">    Rect visible   = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (Coin&amp; c : coins_) {</span><span class="line">        <span class="kw">if</span> (!c.<span class="fn">is_collected</span>() &amp;&amp; <span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), visible)) {</span><span class="line">            c.<span class="fn">update</span>(window.<span class="fn">frame_count</span>());</span><span class="line">            <span class="kw">if</span> (<span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), mariorect)) {</span><span class="line">                c.<span class="fn">collect</span>();</span><span class="line">                coin_finder_.<span class="fn">remove</span>(&amp;c);</span><span class="line">                std::cout &lt;&lt; <span class="str">"You have "</span> &lt;&lt; score_++ &lt;&lt; <span class="str">" coins.\n"</span>;</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">update_camera</span>(pro2::Window&amp; window) {</span><span class="line">    <span class="kw">const</span> Pt pos = mario_.<span class="fn">pos</span>();</span><span class="line">    <span class="kw">const</span> Pt cam = window.<span class="fn">camera_center</span>();</span><span class="line">    <span class="kw">const int</span> left   = cam.x - window.<span class="fn">width</span>()  / <span class="num">4</span>;</span><span class="line">    <span class="kw">const int</span> right  = cam.x + window.<span class="fn">width</span>()  / <span class="num">4</span>;</span><span class="line">    <span class="kw">const int</span> top    = cam.y - window.<span class="fn">height</span>() / <span class="num">4</span>;</span><span class="line">    <span class="kw">const int</span> bottom = cam.y + window.<span class="fn">height</span>() / <span class="num">4</span>;</span><span class="line">    <span class="kw">int</span> dx = <span class="num">0</span>, dy = <span class="num">0</span>;</span><span class="line">    <span class="kw">if</span> (pos.x &gt; right)       dx = pos.x - right;</span><span class="line">    <span class="kw">else if</span> (pos.x &lt; left)   dx = pos.x - left;</span><span class="line">    <span class="kw">if</span> (pos.y &lt; top)         dy = pos.y - top;</span><span class="line">    <span class="kw">else if</span> (pos.y &gt; bottom) dy = pos.y - bottom;</span><span class="line">    window.<span class="fn">move_camera</span>({dx, dy});</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">update</span>(pro2::Window&amp; window) {</span><span class="line">    <span class="fn">process_keys</span>(window);</span><span class="line">    <span class="fn">update_objects</span>(window);</span><span class="line">    <span class="fn">update_camera</span>(window);</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">paint</span>(pro2::Window&amp; window) {</span><span class="line">    window.<span class="fn">clear</span>(sky_blue);</span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(visible))</span><span class="line">        p-&gt;<span class="fn">paint</span>(window);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Coin* c : coin_finder_.<span class="fn">query</span>(visible))</span><span class="line">        c-&gt;<span class="fn">paint_coin</span>(window);</span><span class="line">    mario_.<span class="fn">paint</span>(window);</span><span class="line">}</span></pre>
             </div>
 
             <h2 id="optimization">Optimization Check</h2>
