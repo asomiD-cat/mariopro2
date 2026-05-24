@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📁 Source Files — Mario Pro2</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #313338;
+        color: #dbdee1;
+        font-family:
+          "gg sans", "Noto Sans", Whitney, "Helvetica Neue", Helvetica, Arial,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.375;
+        min-height: 100vh;
+        display: flex;
+      }
+
+      /* ── sidebar ── */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 220px;
+        height: 100vh;
+        background: #2b2d31;
+        border-right: 1px solid #1e1f22;
+        overflow-y: auto;
+        padding: 16px 0;
+        z-index: 10;
+      }
+      .sidebar-header {
+        padding: 8px 16px 16px;
+        border-bottom: 1px solid #3f4147;
+        margin-bottom: 8px;
+      }
+      .sidebar-header img {
+        width: 56px;
+        display: block;
+        image-rendering: pixelated;
+        transition: transform 0.15s;
+      }
+      .sidebar-header a:hover img {
+        transform: scale(1.1);
+      }
+      .sidebar-header p {
+        font-size: 11px;
+        color: #80848e;
+        margin-top: 4px;
+      }
+      .nav-section {
+        font-size: 11px;
+        font-weight: 700;
+        color: #80848e;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 12px 16px 4px;
+      }
+      .file-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: calc(100% - 16px);
+        margin: 1px 8px;
+        padding: 5px 10px;
+        background: none;
+        border: none;
+        border-radius: 4px;
+        color: #b5bac1;
+        font-size: 13px;
+        font-family: "Consolas", monospace;
+        text-align: left;
+        cursor: pointer;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .file-btn:hover {
+        background: #35373c;
+        color: #f2f3f5;
+      }
+      .file-btn.active {
+        background: #404249;
+        color: #f2f3f5;
+      }
+      .file-btn .ext {
+        font-size: 10px;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .ext-hh {
+        background: #1a3a5c;
+        color: #61afef;
+      }
+      .ext-cc {
+        background: #1a3a1a;
+        color: #57f287;
+      }
+      .ext-mk {
+        background: #3a2a1a;
+        color: #f0b232;
+      }
+
+      /* ── main ── */
+      main {
+        margin-left: 220px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        padding: 20px 32px 16px;
+        border-bottom: 1px solid #3f4147;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .topbar h1 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #f2f3f5;
+      }
+      .topbar .filename {
+        font-size: 14px;
+        color: #949cf7;
+        font-family: monospace;
+      }
+
+      .welcome {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #4e5058;
+        gap: 12px;
+      }
+      .welcome .icon {
+        font-size: 48px;
+      }
+      .welcome p {
+        font-size: 15px;
+      }
+
+      /* ── code view ── */
+      .code-view {
+        display: none;
+        flex: 1;
+        flex-direction: column;
+      }
+      .code-view.visible {
+        display: flex;
+      }
+      .code-header {
+        background: #232428;
+        padding: 8px 32px;
+        border-bottom: 1px solid #111214;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .code-lang {
+        font-size: 11px;
+        font-weight: 700;
+        color: #949cf7;
+        font-family: monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .code-filename {
+        font-size: 13px;
+        color: #80848e;
+        font-family: monospace;
+      }
+      .code-scroll {
+        overflow: auto;
+        flex: 1;
+      }
+      pre {
+        padding: 20px 32px;
+        font-family: "Consolas", "Andale Mono", "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #dbdee1;
+        min-width: max-content;
+      }
+      .line-num {
+        color: #3f4147;
+        user-select: none;
+        display: inline-block;
+        min-width: 36px;
+        text-align: right;
+        margin-right: 20px;
+      }
+
+      /* syntax */
+      .kw {
+        color: #c678dd;
+      }
+      .tp {
+        color: #e5c07b;
+      }
+      .fn {
+        color: #61afef;
+      }
+      .cm {
+        color: #5c6370;
+        font-style: italic;
+      }
+      .str {
+        color: #98c379;
+      }
+      .num {
+        color: #d19a66;
+      }
+      .pp {
+        color: #c678dd;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1e1f22;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3f4147;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 700px) {
+        .sidebar {
+          display: none;
+        }
+        main {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html"><img src="mario.png" alt="Home" /></a>
+        <p>Source browser</p>
+      </div>
+
+      <span class="nav-section">Headers</span>
+      <button class="file-btn" onclick="show('coin_hh')">
+        <span class="ext ext-hh">hh</span>coin.hh
+      </button>
+      <button class="file-btn" onclick="show('finder_hh')">
+        <span class="ext ext-hh">hh</span>finder.hh
+      </button>
+      <button class="file-btn" onclick="show('game_hh')">
+        <span class="ext ext-hh">hh</span>game.hh
+      </button>
+      <button class="file-btn" onclick="show('geometry_hh')">
+        <span class="ext ext-hh">hh</span>geometry.hh
+      </button>
+      <button class="file-btn" onclick="show('mario_hh')">
+        <span class="ext ext-hh">hh</span>mario.hh
+      </button>
+      <button class="file-btn" onclick="show('platform_hh')">
+        <span class="ext ext-hh">hh</span>platform.hh
+      </button>
+      <button class="file-btn" onclick="show('window_hh')">
+        <span class="ext ext-hh">hh</span>window.hh
+      </button>
+
+      <span class="nav-section">Sources</span>
+      <button class="file-btn" onclick="show('coin_cc')">
+        <span class="ext ext-cc">cc</span>coin.cc
+      </button>
+      <button class="file-btn" onclick="show('game_cc')">
+        <span class="ext ext-cc">cc</span>game.cc
+      </button>
+      <button class="file-btn" onclick="show('main_cc')">
+        <span class="ext ext-cc">cc</span>main.cc
+      </button>
+      <button class="file-btn" onclick="show('mario_cc')">
+        <span class="ext ext-cc">cc</span>mario.cc
+      </button>
+      <button class="file-btn" onclick="show('platform_cc')">
+        <span class="ext ext-cc">cc</span>platform.cc
+      </button>
+      <button class="file-btn" onclick="show('window_cc')">
+        <span class="ext ext-cc">cc</span>window.cc
+      </button>
+    </nav>
+
+    <main>
+      <div class="welcome" id="welcome">
+        <div class="icon">📁</div>
+        <p>Select a file to view its source</p>
+      </div>
+
+      <div class="code-view" id="code-view">
+        <div class="code-header">
+          <span class="code-lang" id="code-lang">C++</span>
+          <span class="code-filename" id="code-filename"></span>
+        </div>
+        <div class="code-scroll">
+          <pre id="code-pre"></pre>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const files = {
+        coin_hh: {
+          name: "coin.hh",
+          lang: "C++",
+          code: `#ifndef COIN_HH
+#define COIN_HH
+
+#include <vector>
+#include <cmath>
+#include "geometry.hh"
+#include "window.hh"
+#include "utils.hh"
+
+class Coin {
+private:
+    static const std::vector<std::vector<int>> coin_sprite_;
+
+    pro2::Pt pos_;
+    double   initial_y;
+    bool     collected_;
+
+public:
+    Coin(pro2::Pt pos) : pos_(pos), collected_(false), initial_y(pos.y) {}
+
+    void update(int frame_count) {
+        pos_.y = initial_y + (3 * sin(frame_count) * 0.0001);
+    }
+
+    void collect() { collected_ = true; }
+
+    void paint_coin(pro2::Window& window) const {
+        pro2::paint_sprite(window, pos_, coin_sprite_, false);
+    }
+
+    bool is_collected() const { return collected_; }
+
+    pro2::Rect get_rect() const {
+        // {left, top, right, bottom}
+        return {pos_.x - 4, pos_.y - 4, pos_.x + 4, pos_.y + 4};
+    }
+};
+
+#endif`,
+        },
+        coin_cc: {
+          name: "coin.cc",
+          lang: "C++",
+          code: `#include <vector>
+#include "window.hh"
+#include "coin.hh"
+
+const int b = pro2::black;
+const int m = 0x5c4033;
+const int y = pro2::yellow;
+const int _ = 0x5c94fc;
+
+const std::vector<std::vector<int>> Coin::coin_sprite_ = {
+    {_, _, b, b, b, b, _, _},
+    {_, b, y, y, y, y, b, _},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {b, y, y, b, m, y, y, b},
+    {_, b, y, y, y, y, b, _},
+    {_, _, b, b, b, b, _, _},
+};`,
+        },
+        finder_hh: {
+          name: "finder.hh",
+          lang: "C++",
+          code: `#ifndef FINDER_HH
+#define FINDER_HH
+
+#include <cmath>
+#include <map>
+#include <set>
+#include "geometry.hh"
+
+template <typename T>
+class Finder {
+private:
+    const int cellSize = 40;
+    std::map<std::pair<int, int>, std::set<const T*>> grid;
+
+    void gridRange(const pro2::Rect& element_rect, pro2::Rect& tiles) const {
+        tiles.bottom = floor(element_rect.bottom / cellSize);
+        tiles.top    = floor(element_rect.top    / cellSize);
+        tiles.left   = floor(element_rect.left   / cellSize);
+        tiles.right  = floor(element_rect.right  / cellSize);
+    }
+
+public:
+    Finder() {}
+
+    void add(const T* t) {
+        pro2::Rect tiles;
+        gridRange(t->get_rect(), tiles);
+        for (int y = tiles.top; y <= tiles.bottom; ++y)
+            for (int x = tiles.left; x <= tiles.right; ++x)
+                grid[{x, y}].insert(t);
+    }
+
+    void remove(const T* t) {
+        pro2::Rect tiles;
+        gridRange(t->get_rect(), tiles);
+        for (int y = tiles.top; y <= tiles.bottom; ++y) {
+            for (int x = tiles.left; x <= tiles.right; ++x) {
+                auto it = grid.find({x, y});
+                if (it != grid.end()) {
+                    it->second.erase(t);
+                    if (it->second.empty()) grid.erase(it);
+                }
+            }
+        }
+    }
+
+    void update(const T* t) { remove(t); add(t); }
+
+    std::set<const T*> query(pro2::Rect window_rect) const {
+        std::set<const T*> result;
+        pro2::Rect tiles;
+        gridRange(window_rect, tiles);
+        for (int y = tiles.top; y <= tiles.bottom; ++y)
+            for (int x = tiles.left; x <= tiles.right; ++x) {
+                auto it = grid.find({x, y});
+                if (it != grid.end())
+                    for (const auto& p : it->second)
+                        result.insert(p);
+            }
+        return result;
+    }
+};
+
+#endif`,
+        },
+        game_hh: {
+          name: "game.hh",
+          lang: "C++",
+          code: `#ifndef GAME_HH
+#define GAME_HH
+
+#include <vector>
+#include "finder.hh"
+#include "mario.hh"
+#include "platform.hh"
+#include "window.hh"
+#include "coin.hh"
+
+class Game {
+    Mario                 mario_;
+    std::vector<Platform> platforms_;
+    int                   score_;
+    std::vector<Coin>     coins_;
+    Finder<Platform>      platform_finder_;
+    Finder<Coin>          coin_finder_;
+
+    bool finished_;
+
+    void process_keys(pro2::Window& window);
+    void update_objects(pro2::Window& window);
+    void update_camera(pro2::Window& window);
+
+public:
+    Game(int width, int height);
+
+    void update(pro2::Window& window);
+    void paint(pro2::Window& window);
+
+    bool is_finished() const { return finished_; }
+
+private:
+    static constexpr int sky_blue = 0x5c94fc;
+};
+
+#endif`,
+        },
+        game_cc: {
+          name: "game.cc",
+          lang: "C++",
+          code: `#include "game.hh"
+#include "assert.hh"
+#include "coin.hh"
+#include "geometry.hh"
+#include "platform.hh"
+using namespace pro2;
+
+Game::Game(int width, int height)
+    : mario_({width / 2, 150}),
+      platforms_{
+          Platform(100, 300, 200, 211),
+          Platform(0, 200, 250, 261),
+          Platform(250, 400, 150, 161),
+      },
+      finished_(false),
+      score_(1) {
+    assert(width > 0 && height > 0, "L'amplada i l'alcada del joc han de ser positives.");
+    for (int i = 1; i < 20; i++) {
+        platforms_.push_back(Platform(250 + i * 200, 400 + i * 200, 150, 161));
+        coins_.push_back(Coin({250 + i * 200, 140}));
+        coins_.push_back(Coin({250 + i * 200 - 60, 140}));
+        coins_.push_back(Coin({250 + i * 200 + 60, 140}));
+    }
+    for (const auto& p : platforms_) platform_finder_.add(&p);
+    for (const auto& c : coins_)     coin_finder_.add(&c);
+}
+
+void Game::process_keys(pro2::Window& window) {
+    if (window.is_key_down(Keys::Escape)) {
+        finished_ = true;
+        return;
+    }
+}
+
+void Game::update_objects(pro2::Window& window) {
+    std::vector<Platform> nearby;
+    Rect aux = mario_.get_rect();
+    aux.left -= 480; aux.right += 480;
+    aux.top -= 480; aux.bottom += 480;
+    for (const Platform* p : platform_finder_.query(aux))
+        nearby.push_back(*p);
+    mario_.update(window, nearby);
+
+    Rect mariorect = mario_.get_rect();
+    Rect visible = window.camera_rect();
+    for (Coin& c : coins_) {
+        if (!c.is_collected() && overlaps(c.get_rect(), visible)) {
+            c.update(window.frame_count());
+            if (overlaps(c.get_rect(), mariorect)) {
+                c.collect();
+                coin_finder_.remove(&c);
+                std::cout << "You have " << score_++ << " coins.\\n";
+            }
+        }
+    }
+}
+
+void Game::update_camera(pro2::Window& window) {
+    const Pt pos = mario_.pos();
+    const Pt cam = window.camera_center();
+    const int left   = cam.x - window.width()  / 4;
+    const int right  = cam.x + window.width()  / 4;
+    const int top    = cam.y - window.height() / 4;
+    const int bottom = cam.y + window.height() / 4;
+    int dx = 0, dy = 0;
+    if (pos.x > right)       dx = pos.x - right;
+    else if (pos.x < left)   dx = pos.x - left;
+    if (pos.y < top)         dy = pos.y - top;
+    else if (pos.y > bottom) dy = pos.y - bottom;
+    window.move_camera({dx, dy});
+}
+
+void Game::update(pro2::Window& window) {
+    process_keys(window);
+    update_objects(window);
+    update_camera(window);
+}
+
+void Game::paint(pro2::Window& window) {
+    window.clear(sky_blue);
+    Rect visible = window.camera_rect();
+    for (const Platform* p : platform_finder_.query(visible))
+        p->paint(window);
+    for (const Coin* c : coin_finder_.query(visible))
+        c->paint_coin(window);
+    mario_.paint(window);
+}`,
+        },
+        geometry_hh: {
+          name: "geometry.hh",
+          lang: "C++",
+          code: `#ifndef GEOMETRY_HH
+#define GEOMETRY_HH
+
+namespace pro2 {
+
+struct Pt {
+    int x = 0, y = 0;
+};
+
+inline bool operator<(const Pt& a, const Pt& b) {
+    return a.x != b.x ? a.x < b.x : a.y < b.y;
+}
+
+struct Rect {
+    int left, top, right, bottom;
+};
+
+inline bool overlaps(const Rect& a, const Rect& b) {
+    return !(a.right < b.left || a.left > b.right ||
+             a.bottom < b.top || a.top > b.bottom);
+}
+
+}
+
+#endif`,
+        },
+        mario_hh: {
+          name: "mario.hh",
+          lang: "C++",
+          code: `#ifndef MARIO_HH
+#define MARIO_HH
+
+#include <iostream>
+#include <vector>
+#include "platform.hh"
+#include "window.hh"
+
+class Mario {
+private:
+    pro2::Pt pos_, last_pos_;
+    pro2::Pt speed_ = {0, 0};
+    pro2::Pt accel_ = {0, 0};
+    int      accel_time_ = 0;
+    bool     grounded_ = false;
+    bool     looking_left_ = false;
+
+    void apply_physics_();
+
+public:
+    Mario(pro2::Pt pos) : pos_(pos), last_pos_(pos) {}
+
+    void paint(pro2::Window& window) const;
+
+    pro2::Pt pos() const { return pos_; }
+    void set_y(int y) { pos_.y = y; }
+    bool is_grounded() const { return grounded_; }
+
+    void set_grounded(bool grounded) {
+        grounded_ = grounded;
+        if (grounded_) speed_.y = 0;
+    }
+
+    void toggle_grounded() { set_grounded(!grounded_); }
+    void jump();
+
+    void update(pro2::Window& window, const std::vector<Platform>& platforms);
+
+    pro2::Rect get_rect() {
+        return {pos_.x - 6, pos_.y - 15, pos_.x + 6, pos_.y};
+    }
+
+private:
+    static const std::vector<std::vector<int>> mario_sprite_normal_;
+};
+
+#endif`,
+        },
+        mario_cc: {
+          name: "mario.cc",
+          lang: "C++",
+          code: `#include "mario.hh"
+#include "utils.hh"
+using namespace std;
+using namespace pro2;
+
+const int _ = -1;
+const int r = pro2::red;
+const int s = 0xecc49b;
+const int b = 0x5e6ddc;
+const int y = pro2::yellow;
+const int h = pro2::black;
+const int g = 0xaaaaaa;
+const int w = 0x8d573c;
+
+const vector<vector<int>> Mario::mario_sprite_normal_ = {
+    {_, _, _, r, r, r, r, r, _, _, _, _},
+    {_, _, r, r, r, r, r, r, r, r, r, _},
+    {_, _, h, h, h, s, s, h, s, _, _, _},
+    {_, h, s, h, s, s, s, h, s, s, s, _},
+    {_, h, s, h, h, s, s, s, h, s, s, s},
+    {_, h, h, s, s, s, s, h, h, h, h, _},
+    {_, _, _, s, s, s, s, s, s, s, _, _},
+    {_, _, r, r, b, r, r, r, _, _, _, _},
+    {_, r, r, r, b, r, r, b, r, r, r, _},
+    {r, r, r, r, b, b, b, b, r, r, r, r},
+    {g, g, r, b, y, b, b, y, b, r, g, g},
+    {g, g, g, b, b, b, b, b, b, g, g, g},
+    {g, g, b, b, b, b, b, b, b, b, g, g},
+    {_, _, b, b, b, _, _, b, b, b, _, _},
+    {_, w, w, w, _, _, _, _, w, w, w, _},
+    {w, w, w, w, _, _, _, _, w, w, w, w},
+};
+
+void Mario::paint(pro2::Window& window) const {
+    const Pt top_left = {pos_.x - 6, pos_.y - 15};
+    paint_sprite(window, top_left, mario_sprite_normal_, looking_left_);
+}
+
+void Mario::apply_physics_() {
+    if (grounded_) { speed_.y = 0; accel_.y = 0; }
+    const int gravity = 1;
+    speed_.y += gravity;
+    if (accel_time_ > 0) { speed_.y += accel_.y; accel_time_--; }
+    pos_.x += speed_.x;
+    pos_.y += speed_.y;
+}
+
+void Mario::jump() {
+    if (grounded_) {
+        accel_.y = -6;
+        grounded_ = false;
+        accel_time_ = 2;
+    }
+}
+
+void Mario::update(pro2::Window& window, const vector<Platform>& platforms) {
+    last_pos_ = pos_;
+    if (window.is_key_down(Keys::Space)) jump();
+    speed_.x = 0;
+    if (window.is_key_down(Keys::Left))       speed_.x = -4;
+    else if (window.is_key_down(Keys::Right)) speed_.x = 4;
+    if (speed_.x != 0) looking_left_ = speed_.x < 0;
+    apply_physics_();
+    set_grounded(false);
+    for (const Platform& platform : platforms) {
+        if (platform.has_crossed_floor_downwards(last_pos_, pos_)) {
+            set_grounded(true);
+            set_y(platform.top());
+        }
+    }
+}`,
+        },
+        platform_hh: {
+          name: "platform.hh",
+          lang: "C++",
+          code: `#ifndef PLATFORM_HH
+#define PLATFORM_HH
+
+#include <vector>
+#include "window.hh"
+#include "assert.hh"
+
+class Platform {
+private:
+    int left_, right_, top_, bottom_;
+    static const std::vector<std::vector<int>> platform_texture_;
+
+public:
+    Platform() : left_(0), right_(0), top_(0), bottom_(0) {}
+
+    Platform(const Platform& other)
+        : left_(other.left_), right_(other.right_),
+          top_(other.top_), bottom_(other.bottom_) {}
+
+    Platform(int left, int right, int top, int bottom)
+        : left_(left), right_(right), top_(top), bottom_(bottom) {
+        assert(left <= right && top <= bottom,
+               "La plataforma ha de tenir limits valids.");
+    }
+
+    void paint(pro2::Window& window) const;
+    bool has_crossed_floor_downwards(pro2::Pt plast, pro2::Pt pcurr) const;
+    bool is_pt_inside(pro2::Pt pt) const;
+
+    int top() const { return top_; }
+
+    pro2::Rect get_rect() const {
+        return {left_, top_, right_, bottom_};
+    }
+};
+
+#endif`,
+        },
+        platform_cc: {
+          name: "platform.cc",
+          lang: "C++",
+          code: `#include "platform.hh"
+#include "assert.hh"
+using namespace std;
+using pro2::Color;
+
+const int b = 0xc84d0b;
+const int _ = 0;
+
+const vector<vector<int>> Platform::platform_texture_ = {
+    {b, b, b, b, b, b, _},
+    {b, b, b, b, b, b, _},
+    {b, b, b, b, b, b, _},
+    {_, _, _, _, _, _, _},
+    {b, b, b, _, b, b, b},
+    {b, b, b, _, b, b, b},
+    {b, b, b, _, b, b, b},
+    {_, _, _, _, _, _, _},
+};
+
+void Platform::paint(pro2::Window& window) const {
+    assert(!platform_texture_.empty() && !platform_texture_[0].empty(),
+           "La textura de la plataforma no pot ser buida.");
+    const int xsz = platform_texture_.size();
+    const int ysz = platform_texture_[0].size();
+    for (int i = top_ + 1; i <= bottom_; i++)
+        for (int j = left_; j <= right_; j++)
+            window.set_pixel({j, i},
+                platform_texture_[(i - top_ - 1) % xsz][(j - left_) % ysz]);
+}
+
+bool Platform::has_crossed_floor_downwards(pro2::Pt plast, pro2::Pt pcurr) const {
+    return (left_ <= plast.x && plast.x <= right_) &&
+           (left_ <= pcurr.x && pcurr.x <= right_) &&
+           (plast.y <= top_ && pcurr.y >= top_);
+}
+
+bool Platform::is_pt_inside(pro2::Pt pt) const {
+    return left_ <= pt.x && pt.x <= right_ &&
+           top_  <= pt.y && pt.y <= bottom_;
+}`,
+        },
+        window_hh: {
+          name: "window.hh",
+          lang: "C++",
+          code: `#ifndef WINDOW_HH
+#define WINDOW_HH
+
+#include <algorithm>
+#include <string>
+#include "fenster.h"
+#include "geometry.hh"
+
+namespace pro2 {
+
+using Color = int;
+static constexpr Color black  = 0x000000;
+static constexpr Color white  = 0xffffff;
+static constexpr Color red    = 0xff0000;
+static constexpr Color green  = 0x00ff00;
+static constexpr Color blue   = 0x0000ff;
+static constexpr Color yellow = 0xffff00;
+
+enum class Keys { Left = 20, Right = 19, Up = 17, Down = 18, Space = 32, Escape = 27 };
+
+class Window {
+    struct fenster fenster_;
+    uint32_t      *pixels_;
+    size_t         pixels_size_;
+    int            zoom_;
+    int            fps_  = 60;
+    int            frame_count_ = 0;
+    int64_t        last_time_;
+    pro2::Pt       topleft_        = {0, 0};
+    pro2::Pt       topleft_target_ = {0, 0};
+    int            camera_speed_   = 8;
+    int            last_keys_[256] = {};
+    int            last_mouse_     = 0;
+
+    void update_camera_();
+
+public:
+    Window(std::string title, int width, int height, int zoom = 1);
+
+    bool next_frame();
+    void clear(Color color = black);
+    void set_pixel(Pt pt, Color color);
+    Pt   mouse_pos() const;
+
+    bool is_key_down(Keys key) const {
+        return fenster_.keys[(int)key];
+    }
+
+    int width()  const { return fenster_.width  / zoom_; }
+    int height() const { return fenster_.height / zoom_; }
+    int frame_count() const { return frame_count_; }
+    void set_fps(int fps) { fps_ = fps; }
+
+    Pt camera_center() const {
+        return {topleft_.x + width() / 2, topleft_.y + height() / 2};
+    }
+
+    Rect camera_rect() const {
+        return {topleft_.x, topleft_.y,
+                topleft_.x + width(), topleft_.y + height()};
+    }
+
+    void move_camera(Pt delta) {
+        topleft_target_.x += delta.x;
+        topleft_target_.y += delta.y;
+    }
+};
+
+}`,
+        },
+        window_cc: {
+          name: "window.cc",
+          lang: "C++",
+          name: "window.cc",
+          lang: "C++",
+          code: `#include "fenster.h"
+#include "window.hh"
+using std::string;
+
+namespace pro2 {
+
+Window::Window(string title, int width, int height, int zoom)
+    : fenster_{.title = title.c_str(), .width = width * zoom, .height = height * zoom},
+      zoom_(zoom),
+      pixels_size_(width * height * zoom * zoom) {
+    pixels_ = new uint32_t[width * height * zoom * zoom];
+    fenster_.buf = pixels_;
+    fenster_open(&fenster_);
+    last_time_ = fenster_time();
+}
+
+void Window::update_camera_() {
+    if (topleft_.x < topleft_target_.x)
+        topleft_.x += std::min(camera_speed_, topleft_target_.x - topleft_.x);
+    else if (topleft_.x > topleft_target_.x)
+        topleft_.x -= std::min(camera_speed_, topleft_.x - topleft_target_.x);
+    if (topleft_.y < topleft_target_.y)
+        topleft_.y += std::min(camera_speed_, topleft_target_.y - topleft_.y);
+    else if (topleft_.y > topleft_target_.y)
+        topleft_.y -= std::min(camera_speed_, topleft_.y - topleft_target_.y);
+}
+
+bool Window::next_frame() {
+    update_camera_();
+    int wait = int(1000.0 / fps_) - (fenster_time() - last_time_);
+    if (wait > 0) fenster_sleep(wait);
+    last_time_ = fenster_time();
+    frame_count_++;
+    for (size_t i = 0; i < 256; i++) last_keys_[i] = fenster_.keys[i];
+    last_mouse_ = fenster_.mouse;
+    return fenster_loop(&fenster_) == 0;
+}
+
+void Window::clear(Color color) {
+    for (size_t i = 0; i < pixels_size_; i++) pixels_[i] = color;
+}
+
+void Window::set_pixel(Pt pt, Color color) {
+    const Pt camera_pt = {pt.x - topleft_.x, pt.y - topleft_.y};
+    for (int i = 0; i < zoom_; i++)
+        for (int j = 0; j < zoom_; j++) {
+            const int _i = camera_pt.x * zoom_ + i;
+            const int _j = camera_pt.y * zoom_ + j;
+            if (_i >= 0 && _i < fenster_.width && _j >= 0 && _j < fenster_.height)
+                fenster_pixel(&fenster_, _i, _j) = color;
+        }
+}
+
+}`,
+        },
+        main_cc: {
+          name: "main.cc",
+          lang: "C++",
+          code: `#include <vector>
+#include "game.hh"
+#include "window.hh"
+using namespace std;
+
+const int WIDTH  = 480, HEIGHT = 320;
+const int ZOOM   = 2;
+const int FPS    = 48;
+
+int main() {
+    pro2::Window window("Mario Pro 2", WIDTH, HEIGHT, ZOOM);
+    window.set_fps(FPS);
+
+    Game game(WIDTH, HEIGHT);
+
+    while (window.next_frame() && !game.is_finished()) {
+        game.update(window);
+        game.paint(window);
+    }
+}`,
+        },
+      };
+
+      function escapeHtml(s) {
+        return s
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function highlight(raw) {
+        // Handle #include lines first
+        if (/^\s*#include/.test(raw)) {
+          const e = raw
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/(#include)/, '<span class="pp">$1</span>')
+            .replace(
+              /(&quot;[^&]*&quot;|&lt;[^&]*&gt;)/,
+              '<span class="str">$1</span>',
+            );
+          return e;
+        }
+
+        const types = new Set([
+          "vector",
+          "set",
+          "map",
+          "pair",
+          "string",
+          "size_t",
+          "uint32_t",
+          "int64_t",
+          "int32_t",
+          "Window",
+          "Rect",
+          "Pt",
+          "Color",
+          "Finder",
+          "Platform",
+          "Coin",
+          "Mario",
+          "Game",
+        ]);
+        const kws = new Set([
+          "template",
+          "typename",
+          "class",
+          "struct",
+          "namespace",
+          "using",
+          "public",
+          "private",
+          "protected",
+          "const",
+          "constexpr",
+          "static",
+          "inline",
+          "return",
+          "for",
+          "while",
+          "if",
+          "else",
+          "true",
+          "false",
+          "new",
+          "delete",
+          "nullptr",
+          "this",
+          "sizeof",
+          "explicit",
+          "void",
+          "int",
+          "bool",
+          "double",
+          "float",
+          "auto",
+          "char",
+          "long",
+          "short",
+          "unsigned",
+        ]);
+
+        // tokenize: strings, comments, words, numbers, other chars
+        const tokens =
+          raw.match(
+            /(\/\/[^\n]*)|(#\w+)|("(?:[^"\\]|\\.)*")|(\b0x[0-9a-fA-F]+\b)|(\b\d+\b)|([a-zA-Z_]\w*)|([^\w])/g,
+          ) || [];
+
+        return tokens
+          .map((tok, i) => {
+            const e = tok
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+            if (tok.startsWith("//")) return `<span class="cm">${e}</span>`;
+            if (tok.startsWith("#")) return `<span class="pp">${e}</span>`;
+            if (tok.startsWith('"')) return `<span class="str">${e}</span>`;
+            if (/^0x[\da-fA-F]+$/.test(tok) || /^\d+$/.test(tok))
+              return `<span class="num">${e}</span>`;
+            if (types.has(tok)) return `<span class="tp">${e}</span>`;
+            if (kws.has(tok)) return `<span class="kw">${e}</span>`;
+            // check if next non-space token is '(' → function
+            if (/^[a-zA-Z_]\w*$/.test(tok)) {
+              const rest = raw
+                .slice(raw.indexOf(tok, i === 0 ? 0 : 0))
+                .replace(tok, "");
+              const after = tokens
+                .slice(i + 1)
+                .join("")
+                .trimStart();
+              if (after.startsWith("(")) return `<span class="fn">${e}</span>`;
+            }
+            return e;
+          })
+          .join("");
+      }
+
+      function addLineNumbers(code) {
+        return code
+          .split("\n")
+          .map(
+            (line, i) =>
+              `<span class="line-num">${i + 1}</span>${highlight(line)}`,
+          )
+          .join("\n");
+      }
+
+      function show(key) {
+        const file = files[key];
+        if (!file) return;
+
+        document.getElementById("welcome").style.display = "none";
+        const view = document.getElementById("code-view");
+        view.classList.add("visible");
+        document.getElementById("code-lang").textContent = file.lang;
+        document.getElementById("code-filename").textContent = file.name;
+        document.getElementById("code-pre").innerHTML = addLineNumbers(
+          file.code,
+        );
+
+        document
+          .querySelectorAll(".file-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.currentTarget.classList.add("active");
+      }
+    </script>
+  </body>
+</html>
