@@ -29,5 +29,5 @@ Each student implements their own feature to finish the game however they want.
 
 ## Author
 
-[![GitHub](https://img.shields.io/badge/asomiD--cat-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/asomiD-cat/mariopro2)
+[![GitHub](https://img.shields.io/badge/asomiD--cat-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/asomiD-cat)
 
