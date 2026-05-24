@@ -106,10 +106,6 @@
         background: #1a3a1a;
         color: #57f287;
       }
-      .ext-mk {
-        background: #3a2a1a;
-        color: #f0b232;
-      }
 
       /* ── main ── */
       main {
@@ -118,24 +114,6 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-      }
-
-      .topbar {
-        padding: 20px 32px 16px;
-        border-bottom: 1px solid #3f4147;
-        display: flex;
-        align-items: baseline;
-        gap: 12px;
-      }
-      .topbar h1 {
-        font-size: 20px;
-        font-weight: 700;
-        color: #f2f3f5;
-      }
-      .topbar .filename {
-        font-size: 14px;
-        color: #949cf7;
-        font-family: monospace;
       }
 
       .welcome {
@@ -262,6 +240,9 @@
       <button class="file-btn" onclick="show('coin_hh')">
         <span class="ext ext-hh">hh</span>coin.hh
       </button>
+      <button class="file-btn" onclick="show('crumbling_hh')">
+        <span class="ext ext-hh">hh</span>crumbling.hh
+      </button>
       <button class="file-btn" onclick="show('finder_hh')">
         <span class="ext ext-hh">hh</span>finder.hh
       </button>
@@ -284,6 +265,9 @@
       <span class="nav-section">Sources</span>
       <button class="file-btn" onclick="show('coin_cc')">
         <span class="ext ext-cc">cc</span>coin.cc
+      </button>
+      <button class="file-btn" onclick="show('crumbling_cc')">
+        <span class="ext ext-cc">cc</span>crumbling.cc
       </button>
       <button class="file-btn" onclick="show('game_cc')">
         <span class="ext ext-cc">cc</span>game.cc
@@ -357,7 +341,6 @@ public:
     bool is_collected() const { return collected_; }
 
     pro2::Rect get_rect() const {
-        // {left, top, right, bottom}
         return {pos_.x - 4, pos_.y - 4, pos_.x + 4, pos_.y + 4};
     }
 };
@@ -386,6 +369,137 @@ const std::vector<std::vector<int>> Coin::coin_sprite_ = {
     {_, b, y, y, y, y, b, _},
     {_, _, b, b, b, b, _, _},
 };`,
+        },
+        crumbling_hh: {
+          name: "crumbling.hh",
+          lang: "C++",
+          code: `#ifndef CRUMBLING_HH
+#define CRUMBLING_HH
+
+#include "geometry.hh"
+#include "window.hh"
+#include <vector>
+#include <string>
+
+class Crumbling {
+ private:
+    int left_, right_, top_, bottom_;
+    std::string state_;
+    int   timer_;
+
+    static const std::vector<std::vector<int>> crumbling_texture_;
+
+    static const int SHAKE_FRAMES   = 60;
+    static const int FALL_FRAMES    = 30;
+    static const int FALLEN_FRAMES  = 96;
+
+ public:
+    Crumbling(int left, int right, int top, int bottom)
+        : left_(left), right_(right), top_(top), bottom_(bottom),
+          state_("normal"), timer_(0) {}
+
+    void update() {
+        if (state_ == "shaking") {
+            timer_++;
+            if (timer_ >= SHAKE_FRAMES) {
+                state_ = "falling";
+                timer_ = 0;
+            }
+        } else if (state_ == "falling") {
+            timer_++;
+            if (timer_ >= FALL_FRAMES) {
+                state_ = "fallen";
+                timer_ = 0;
+            }
+        } else if (state_ == "fallen") {
+            timer_++;
+            if (timer_ >= FALLEN_FRAMES) {
+                state_ = "normal";
+                timer_ = 0;
+            }
+        }
+    }
+
+    void mario_on_top() {
+        if (state_ == "normal") {
+            state_ = "shaking";
+            timer_ = 0;
+        }
+    }
+
+    bool is_solid() const {
+        return state_ == "normal" || state_ == "shaking";
+    }
+
+    std::string state() const { return state_; }
+
+    pro2::Rect get_rect() const {
+        if (state_ == "fallen") return {0, 0, 0, 0};
+        return {left_, top_, right_, bottom_};
+    }
+
+    bool has_crossed_floor_downwards(pro2::Pt plast, pro2::Pt pcurr) const {
+        if (!is_solid()) return false;
+        return (left_ <= plast.x && plast.x <= right_) &&
+               (left_ <= pcurr.x && pcurr.x <= right_) &&
+               (plast.y <= top_ && pcurr.y >= top_);
+    }
+
+    void paint(pro2::Window& window) const;
+
+    int top() { return top_; }
+};
+
+#endif`,
+        },
+        crumbling_cc: {
+          name: "crumbling.cc",
+          lang: "C++",
+          code: `#include "crumbling.hh"
+#include <vector>
+using namespace std;
+
+const int _ = 0;
+const int r = pro2::red;
+const int y = pro2::yellow;
+const int w = pro2::white;
+
+const vector<vector<int>> Crumbling::crumbling_texture_ = {
+    {w, w, w, w, w, w, _},
+    {w, y, y, w, y, y, _},
+    {y, y, r, y, y, r, _},
+    {_, _, _, _, _, _, _},
+    {w, w, _, w, w, w, _},
+    {y, y, y, _, y, y, y},
+    {y, r, y, y, _, r, y},
+    {_, _, _, _, _, _, _},
+};
+
+void Crumbling::paint(pro2::Window& window) const {
+    if (state_ == "fallen") return;
+
+    const int txH = static_cast<int>(crumbling_texture_.size());
+    const int txW = static_cast<int>(crumbling_texture_[0].size());
+
+    int offset_x = 0;
+    if (state_ == "shaking") {
+        offset_x = (timer_ % 4 < 2) ? 1 : -1;
+    }
+
+    int offset_y = 0;
+    if (state_ == "falling") {
+        offset_y = timer_ * 4;
+    }
+
+    for (int i = top_ + 1; i <= bottom_; i++) {
+        for (int j = left_; j <= right_; j++) {
+            int color = crumbling_texture_[(i - top_ - 1) % txH][(j - left_) % txW];
+            if (color != 0) {
+                window.set_pixel({j + offset_x, i + offset_y}, color);
+            }
+        }
+    }
+}`,
         },
         finder_hh: {
           name: "finder.hh",
@@ -467,14 +581,17 @@ public:
 #include "platform.hh"
 #include "window.hh"
 #include "coin.hh"
+#include "crumbling.hh"
 
 class Game {
-    Mario                 mario_;
-    std::vector<Platform> platforms_;
-    int                   score_;
-    std::vector<Coin>     coins_;
-    Finder<Platform>      platform_finder_;
-    Finder<Coin>          coin_finder_;
+    Mario                  mario_;
+    std::vector<Platform>  platforms_;
+    std::vector<Crumbling> crumbling_platforms_;
+    int                    score_;
+    std::vector<Coin>      coins_;
+    Finder<Platform>       platform_finder_;
+    Finder<Coin>           coin_finder_;
+    Finder<Crumbling>      crumbling_finder_;
 
     bool finished_;
 
@@ -502,6 +619,7 @@ private:
           code: `#include "game.hh"
 #include "assert.hh"
 #include "coin.hh"
+#include "crumbling.hh"
 #include "geometry.hh"
 #include "platform.hh"
 using namespace pro2;
@@ -517,13 +635,18 @@ Game::Game(int width, int height)
       score_(1) {
     assert(width > 0 && height > 0, "L'amplada i l'alcada del joc han de ser positives.");
     for (int i = 1; i < 20; i++) {
-        platforms_.push_back(Platform(250 + i * 200, 400 + i * 200, 150, 161));
+        if (i % 3 == 0) {
+            crumbling_platforms_.push_back(Crumbling(250 + i * 200, 400 + i * 200, 150, 161));
+        } else {
+            platforms_.push_back(Platform(250 + i * 200, 400 + i * 200, 150, 161));
+        }
         coins_.push_back(Coin({250 + i * 200, 140}));
         coins_.push_back(Coin({250 + i * 200 - 60, 140}));
         coins_.push_back(Coin({250 + i * 200 + 60, 140}));
     }
-    for (const auto& p : platforms_) platform_finder_.add(&p);
-    for (const auto& c : coins_)     coin_finder_.add(&c);
+    for (const auto& p : platforms_)           platform_finder_.add(&p);
+    for (const auto& cp : crumbling_platforms_) crumbling_finder_.add(&cp);
+    for (const auto& c : coins_)               coin_finder_.add(&c);
 }
 
 void Game::process_keys(pro2::Window& window) {
@@ -540,9 +663,19 @@ void Game::update_objects(pro2::Window& window) {
     aux.top -= 480; aux.bottom += 480;
     for (const Platform* p : platform_finder_.query(aux))
         nearby.push_back(*p);
+    for (Crumbling& cp : crumbling_platforms_) {
+        if (cp.is_solid())
+            nearby.push_back(Platform(cp.get_rect().left, cp.get_rect().right, cp.top(), cp.top() + 11));
+    }
     mario_.update(window, nearby);
 
     Rect mariorect = mario_.get_rect();
+    for (Crumbling& cp : crumbling_platforms_) {
+        if (mario_.is_grounded() && overlaps(mariorect, cp.get_rect()))
+            cp.mario_on_top();
+        cp.update();
+    }
+
     Rect visible = window.camera_rect();
     for (Coin& c : coins_) {
         if (!c.is_collected() && overlaps(c.get_rect(), visible)) {
@@ -580,10 +713,9 @@ void Game::update(pro2::Window& window) {
 void Game::paint(pro2::Window& window) {
     window.clear(sky_blue);
     Rect visible = window.camera_rect();
-    for (const Platform* p : platform_finder_.query(visible))
-        p->paint(window);
-    for (const Coin* c : coin_finder_.query(visible))
-        c->paint_coin(window);
+    for (const Platform* p : platform_finder_.query(visible)) p->paint(window);
+    for (const Crumbling* cp : crumbling_finder_.query(visible)) cp->paint(window);
+    for (const Coin* c : coin_finder_.query(visible)) c->paint_coin(window);
     mario_.paint(window);
 }`,
         },
@@ -595,21 +727,16 @@ void Game::paint(pro2::Window& window) {
 
 namespace pro2 {
 
-struct Pt {
-    int x = 0, y = 0;
-};
+struct Pt { int x = 0, y = 0; };
 
 inline bool operator<(const Pt& a, const Pt& b) {
     return a.x != b.x ? a.x < b.x : a.y < b.y;
 }
 
-struct Rect {
-    int left, top, right, bottom;
-};
+struct Rect { int left, top, right, bottom; };
 
 inline bool overlaps(const Rect& a, const Rect& b) {
-    return !(a.right < b.left || a.left > b.right ||
-             a.bottom < b.top || a.top > b.bottom);
+    return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
 }
 
 }
@@ -642,24 +769,16 @@ public:
     Mario(pro2::Pt pos) : pos_(pos), last_pos_(pos) {}
 
     void paint(pro2::Window& window) const;
-
     pro2::Pt pos() const { return pos_; }
     void set_y(int y) { pos_.y = y; }
     bool is_grounded() const { return grounded_; }
-
     void set_grounded(bool grounded) {
         grounded_ = grounded;
         if (grounded_) speed_.y = 0;
     }
-
-    void toggle_grounded() { set_grounded(!grounded_); }
     void jump();
-
     void update(pro2::Window& window, const std::vector<Platform>& platforms);
-
-    pro2::Rect get_rect() {
-        return {pos_.x - 6, pos_.y - 15, pos_.x + 6, pos_.y};
-    }
+    pro2::Rect get_rect() { return {pos_.x - 6, pos_.y - 15, pos_.x + 6, pos_.y}; }
 
 private:
     static const std::vector<std::vector<int>> mario_sprite_normal_;
@@ -759,26 +878,15 @@ private:
 
 public:
     Platform() : left_(0), right_(0), top_(0), bottom_(0) {}
-
-    Platform(const Platform& other)
-        : left_(other.left_), right_(other.right_),
-          top_(other.top_), bottom_(other.bottom_) {}
-
-    Platform(int left, int right, int top, int bottom)
-        : left_(left), right_(right), top_(top), bottom_(bottom) {
-        assert(left <= right && top <= bottom,
-               "La plataforma ha de tenir limits valids.");
+    Platform(const Platform& other) : left_(other.left_), right_(other.right_), top_(other.top_), bottom_(other.bottom_) {}
+    Platform(int left, int right, int top, int bottom) : left_(left), right_(right), top_(top), bottom_(bottom) {
+        assert(left <= right && top <= bottom, "La plataforma ha de tenir limits valids.");
     }
-
     void paint(pro2::Window& window) const;
     bool has_crossed_floor_downwards(pro2::Pt plast, pro2::Pt pcurr) const;
     bool is_pt_inside(pro2::Pt pt) const;
-
     int top() const { return top_; }
-
-    pro2::Rect get_rect() const {
-        return {left_, top_, right_, bottom_};
-    }
+    pro2::Rect get_rect() const { return {left_, top_, right_, bottom_}; }
 };
 
 #endif`,
@@ -806,25 +914,20 @@ const vector<vector<int>> Platform::platform_texture_ = {
 };
 
 void Platform::paint(pro2::Window& window) const {
-    assert(!platform_texture_.empty() && !platform_texture_[0].empty(),
-           "La textura de la plataforma no pot ser buida.");
+    assert(!platform_texture_.empty() && !platform_texture_[0].empty(), "La textura no pot ser buida.");
     const int xsz = platform_texture_.size();
     const int ysz = platform_texture_[0].size();
     for (int i = top_ + 1; i <= bottom_; i++)
         for (int j = left_; j <= right_; j++)
-            window.set_pixel({j, i},
-                platform_texture_[(i - top_ - 1) % xsz][(j - left_) % ysz]);
+            window.set_pixel({j, i}, platform_texture_[(i - top_ - 1) % xsz][(j - left_) % ysz]);
 }
 
 bool Platform::has_crossed_floor_downwards(pro2::Pt plast, pro2::Pt pcurr) const {
-    return (left_ <= plast.x && plast.x <= right_) &&
-           (left_ <= pcurr.x && pcurr.x <= right_) &&
-           (plast.y <= top_ && pcurr.y >= top_);
+    return (left_ <= plast.x && plast.x <= right_) && (left_ <= pcurr.x && pcurr.x <= right_) && (plast.y <= top_ && pcurr.y >= top_);
 }
 
 bool Platform::is_pt_inside(pro2::Pt pt) const {
-    return left_ <= pt.x && pt.x <= right_ &&
-           top_  <= pt.y && pt.y <= bottom_;
+    return left_ <= pt.x && pt.x <= right_ && top_ <= pt.y && pt.y <= bottom_;
 }`,
         },
         window_hh: {
@@ -868,41 +971,23 @@ class Window {
 
 public:
     Window(std::string title, int width, int height, int zoom = 1);
-
     bool next_frame();
     void clear(Color color = black);
     void set_pixel(Pt pt, Color color);
     Pt   mouse_pos() const;
-
-    bool is_key_down(Keys key) const {
-        return fenster_.keys[(int)key];
-    }
-
+    bool is_key_down(Keys key) const { return fenster_.keys[(int)key]; }
     int width()  const { return fenster_.width  / zoom_; }
     int height() const { return fenster_.height / zoom_; }
     int frame_count() const { return frame_count_; }
     void set_fps(int fps) { fps_ = fps; }
-
-    Pt camera_center() const {
-        return {topleft_.x + width() / 2, topleft_.y + height() / 2};
-    }
-
-    Rect camera_rect() const {
-        return {topleft_.x, topleft_.y,
-                topleft_.x + width(), topleft_.y + height()};
-    }
-
-    void move_camera(Pt delta) {
-        topleft_target_.x += delta.x;
-        topleft_target_.y += delta.y;
-    }
+    Pt camera_center() const { return {topleft_.x + width() / 2, topleft_.y + height() / 2}; }
+    Rect camera_rect() const { return {topleft_.x, topleft_.y, topleft_.x + width(), topleft_.y + height()}; }
+    void move_camera(Pt delta) { topleft_target_.x += delta.x; topleft_target_.y += delta.y; }
 };
 
 }`,
         },
         window_cc: {
-          name: "window.cc",
-          lang: "C++",
           name: "window.cc",
           lang: "C++",
           code: `#include "fenster.h"
@@ -912,9 +997,7 @@ using std::string;
 namespace pro2 {
 
 Window::Window(string title, int width, int height, int zoom)
-    : fenster_{.title = title.c_str(), .width = width * zoom, .height = height * zoom},
-      zoom_(zoom),
-      pixels_size_(width * height * zoom * zoom) {
+    : fenster_{.title = title.c_str(), .width = width * zoom, .height = height * zoom}, zoom_(zoom), pixels_size_(width * height * zoom * zoom) {
     pixels_ = new uint32_t[width * height * zoom * zoom];
     fenster_.buf = pixels_;
     fenster_open(&fenster_);
@@ -922,14 +1005,10 @@ Window::Window(string title, int width, int height, int zoom)
 }
 
 void Window::update_camera_() {
-    if (topleft_.x < topleft_target_.x)
-        topleft_.x += std::min(camera_speed_, topleft_target_.x - topleft_.x);
-    else if (topleft_.x > topleft_target_.x)
-        topleft_.x -= std::min(camera_speed_, topleft_.x - topleft_target_.x);
-    if (topleft_.y < topleft_target_.y)
-        topleft_.y += std::min(camera_speed_, topleft_target_.y - topleft_.y);
-    else if (topleft_.y > topleft_target_.y)
-        topleft_.y -= std::min(camera_speed_, topleft_.y - topleft_target_.y);
+    if (topleft_.x < topleft_target_.x) topleft_.x += std::min(camera_speed_, topleft_target_.x - topleft_.x);
+    else if (topleft_.x > topleft_target_.x) topleft_.x -= std::min(camera_speed_, topleft_.x - topleft_target_.x);
+    if (topleft_.y < topleft_target_.y) topleft_.y += std::min(camera_speed_, topleft_target_.y - topleft_.y);
+    else if (topleft_.y > topleft_target_.y) topleft_.y -= std::min(camera_speed_, topleft_.y - topleft_target_.y);
 }
 
 bool Window::next_frame() {
@@ -994,9 +1073,8 @@ int main() {
       }
 
       function highlight(raw) {
-        // Handle #include lines first
         if (/^\s*#include/.test(raw)) {
-          const e = raw
+          return raw
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -1005,7 +1083,6 @@ int main() {
               /(&quot;[^&]*&quot;|&lt;[^&]*&gt;)/,
               '<span class="str">$1</span>',
             );
-          return e;
         }
 
         const types = new Set([
@@ -1027,6 +1104,7 @@ int main() {
           "Coin",
           "Mario",
           "Game",
+          "Crumbling",
         ]);
         const kws = new Set([
           "template",
@@ -1067,7 +1145,6 @@ int main() {
           "unsigned",
         ]);
 
-        // tokenize: strings, comments, words, numbers, other chars
         const tokens =
           raw.match(
             /(\/\/[^\n]*)|(#\w+)|("(?:[^"\\]|\\.)*")|(\b0x[0-9a-fA-F]+\b)|(\b\d+\b)|([a-zA-Z_]\w*)|([^\w])/g,
@@ -1086,11 +1163,7 @@ int main() {
               return `<span class="num">${e}</span>`;
             if (types.has(tok)) return `<span class="tp">${e}</span>`;
             if (kws.has(tok)) return `<span class="kw">${e}</span>`;
-            // check if next non-space token is '(' → function
             if (/^[a-zA-Z_]\w*$/.test(tok)) {
-              const rest = raw
-                .slice(raw.indexOf(tok, i === 0 ? 0 : 0))
-                .replace(tok, "");
               const after = tokens
                 .slice(i + 1)
                 .join("")
