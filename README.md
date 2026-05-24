@@ -1,6 +1,6 @@
 # 🎮 Mario Pro2
 
-A Mario-style platformer built in C++ for the PRO2 course at UPC.
+A Mario-style platformer built in C++ for the PRO2 course at UPC-FIB.
 
 You run, jump, and collect coins across an endless procedurally generated level. The project was built incrementally across three mods, each adding a new feature on top of the previous one.
 
