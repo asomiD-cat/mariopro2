@@ -15,5 +15,5 @@ const std::vector<std::vector<int> > Coin::coin_sprite_ = {
     {b, y, y, b, m, y, y, b},
     {b, y, y, b, m, y, y, b},
     {_, b, y, y, y, y, b, _},
-	{_, _, b, b, b, b, _, _},
+    {_, _, b, b, b, b, _, _},
 };

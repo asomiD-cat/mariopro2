@@ -19,7 +19,7 @@ class Coin{
         Coin(pro2::Pt pos) : pos_(pos), collected_(false), initial_y(pos.y) {}
 
         void update(int frame_count){
-            pos_.y = initial_y + (3* sin(frame_count)*0.0001);
+            pos_.y = initial_y + (3* sin(frame_count)*0.01);
         }
 
         void collect(){
