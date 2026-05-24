@@ -7,14 +7,17 @@
 #include "platform.hh"
 #include "window.hh"
 #include "coin.hh"
+#include "crumbling.hh"
 
 class Game {
     Mario                 mario_;
     std::vector<Platform> platforms_;
+    std::vector<Crumbling> crumbling_platforms_;
     int                   score_;
     std::vector<Coin>     coins_;
     Finder<Platform>      platform_finder_;
     Finder<Coin>          coin_finder_;
+    Finder<Crumbling>     crumbling_finder_;
 
     bool finished_;
 
