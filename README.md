@@ -29,4 +29,4 @@ Each student implements their own feature to finish the game however they want.
 
 [![GitHub](https://img.shields.io/badge/asomiD--cat-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/asomiD-cat/mariopro2)
 [![Twitter/X](https://img.shields.io/badge/b3ak01-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/b3ak01)
-[![LinkedIn](https://cdn.imgchest.com/files/5360655d6e9a.png)](https://www.linkedin.com/in/asomid/)
+[![LinkedIn](https://img.shields.io/badge/asomid-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/asomid/)
