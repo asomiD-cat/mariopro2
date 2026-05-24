@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>💥 Crumbling Platforms Feature</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #313338;
+        color: #dbdee1;
+        font-family:
+          "gg sans", "Noto Sans", Whitney, "Helvetica Neue", Helvetica, Arial,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.375;
+        min-height: 100vh;
+      }
+
+      /* ── layout ── */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 240px;
+        height: 100vh;
+        background: #2b2d31;
+        border-right: 1px solid #1e1f22;
+        overflow-y: auto;
+        padding: 16px 0;
+        z-index: 10;
+      }
+      .sidebar-header {
+        padding: 8px 16px 16px;
+        border-bottom: 1px solid #3f4147;
+        margin-bottom: 8px;
+      }
+      .sidebar-header h2 {
+        font-size: 12px;
+        font-weight: 700;
+        color: #949cf7;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .sidebar-header img {
+        width: 64px;
+        display: block;
+        image-rendering: pixelated;
+        transition: transform 0.15s;
+      }
+      .sidebar-header a:hover img {
+        transform: scale(1.1);
+      }
+      .sidebar-header p {
+        font-size: 11px;
+        color: #80848e;
+        margin-top: 2px;
+      }
+      .nav-item {
+        display: block;
+        padding: 5px 16px;
+        font-size: 14px;
+        color: #b5bac1;
+        text-decoration: none;
+        border-radius: 4px;
+        margin: 1px 8px;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .nav-item:hover {
+        background: #35373c;
+        color: #f2f3f5;
+      }
+      .nav-item.active {
+        background: #404249;
+        color: #f2f3f5;
+      }
+      .nav-section {
+        font-size: 11px;
+        font-weight: 700;
+        color: #80848e;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 12px 16px 4px;
+      }
+
+      main {
+        margin-left: 240px;
+        padding: 32px 48px 64px;
+        max-width: 960px;
+      }
+
+      /* ── typography ── */
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #f2f3f5;
+        margin-bottom: 4px;
+      }
+      .page-subtitle {
+        color: #80848e;
+        font-size: 15px;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3f4147;
+      }
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #f2f3f5;
+        margin: 36px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #3f4147;
+        scroll-margin-top: 24px;
+      }
+      h3 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #dbdee1;
+        margin: 20px 0 8px;
+      }
+      p {
+        color: #b5bac1;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      /* ── table ── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      thead tr {
+        background: #2b2d31;
+      }
+      th {
+        text-align: left;
+        padding: 9px 14px;
+        color: #80848e;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid #3f4147;
+      }
+      td {
+        padding: 8px 14px;
+        border-bottom: 1px solid #2e3035;
+        color: #dbdee1;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      td:first-child {
+        color: #949cf7;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 13px;
+      }
+      tbody tr:hover {
+        background: #2e3035;
+      }
+
+      /* ── code ── */
+      code {
+        background: #2b2d31;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Consolas", "Andale Mono", "Courier New", monospace;
+        font-size: 85%;
+        color: #f2f3f5;
+      }
+      .code-block {
+        background: #1e1f22;
+        border-radius: 6px;
+        margin: 10px 0 18px;
+        overflow: hidden;
+        border: 1px solid #111214;
+      }
+      .code-header {
+        background: #232428;
+        padding: 7px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #111214;
+      }
+      .code-lang {
+        font-size: 12px;
+        font-weight: 700;
+        color: #949cf7;
+        font-family: monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .code-file {
+        font-size: 12px;
+        color: #5c5f66;
+        font-family: monospace;
+      }
+      pre {
+        padding: 14px 0;
+        overflow-x: auto;
+        font-family: "Consolas", "Andale Mono", "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #dbdee1;
+      }
+      pre .line {
+        display: block;
+        padding: 0 16px;
+      }
+      .kw {
+        color: #c678dd;
+      }
+      .fn {
+        color: #61afef;
+      }
+      .cm {
+        color: #5c6370;
+        font-style: italic;
+      }
+      .str {
+        color: #98c379;
+      }
+      .num {
+        color: #d19a66;
+      }
+      .add {
+        display: block;
+        color: #57f287;
+        background: rgba(87, 242, 135, 0.1);
+        padding: 0 16px;
+      }
+      .pp {
+        color: #c678dd;
+      }
+
+      /* ── callouts ── */
+      .note {
+        background: #1e1f22;
+        border-left: 3px solid #5865f2;
+        border-radius: 0 4px 4px 0;
+        padding: 10px 14px;
+        margin: 8px 0 16px;
+        font-size: 14px;
+        color: #b5bac1;
+        line-height: 1.6;
+      }
+      .note strong {
+        color: #f2f3f5;
+      }
+      .warn {
+        background: #1e1f22;
+        border-left: 3px solid #f0b232;
+        border-radius: 0 4px 4px 0;
+        padding: 10px 14px;
+        margin: 8px 0 16px;
+        font-size: 14px;
+        color: #b5bac1;
+        line-height: 1.6;
+      }
+      .warn strong {
+        color: #f2f3f5;
+      }
+
+      /* ── scrollbar ── */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #2b2d31;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1a1b1e;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 700px) {
+        .sidebar {
+          display: none;
+        }
+        main {
+          margin-left: 0;
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html"><img src="mario.png" alt="Mario Pro2 Home" /></a>
+      </div>
+      <span class="nav-section">Crumbling Feature</span>
+      <a class="nav-item active" href="#overview">Overview</a>
+      <a class="nav-item" href="#files">Files Modified</a>
+      <a class="nav-item" href="#crumbling-hh">1. crumbling.hh</a>
+      <a class="nav-item" href="#crumbling-cc">2. crumbling.cc</a>
+      <a class="nav-item" href="#game-hh">3. game.hh</a>
+      <a class="nav-item" href="#game-cc">4. game.cc</a>
+      <a class="nav-item" href="#game-cc-final">5. game.cc — Final File</a>
+    </nav>
+
+    <main>
+      <p class="page-title" id="overview">💥 Crumbling Platforms Feature</p>
+      <p class="page-subtitle">
+        Adding a new platform type that shakes and falls when Mario stands on
+        it, then respawns after a cooldown.
+      </p>
+
+      <h2 id="files">Files Modified / Created</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>crumbling.hh</td>
+            <td>
+              <strong>New class</strong> — state machine, collision, paint
+              declaration
+            </td>
+          </tr>
+          <tr>
+            <td>crumbling.cc</td>
+            <td>
+              <strong>New file</strong> — texture data and
+              <code>paint</code> implementation
+            </td>
+          </tr>
+          <tr>
+            <td>game.hh</td>
+            <td>
+              Add <code>crumbling_platforms_</code> vector and
+              <code>crumbling_finder_</code>
+            </td>
+          </tr>
+          <tr>
+            <td>game.cc</td>
+            <td>
+              Constructor, <code>update_objects</code> and <code>paint</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>General strategy:</strong> <code>Crumbling</code> is modelled
+        after <code>Platform</code> — same private fields (<code>left_</code>,
+        <code>right_</code>, <code>top_</code>, <code>bottom_</code>), same
+        constructor signature, same <code>get_rect()</code> and
+        <code>paint()</code>. Copy <code>platform.hh</code> as a starting
+        skeleton and add the state machine on top.
+      </div>
+
+      <h2 id="crumbling-hh">1. crumbling.hh — New Class</h2>
+      <p>
+        The <code>Crumbling</code> class models a platform with four states:
+        <strong>"normal" → "shaking" → "falling" → "fallen"</strong>, cycling
+        back to "normal" after a cooldown.
+      </p>
+
+      <h3>State string &amp; constants</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">crumbling.hh — private</span>
+        </div>
+        <pre><span class="line"><span class="kw">class</span> <span class="fn">Crumbling</span> {</span><span class="line"> <span class="kw">public</span>:</span><span class="line"> </span><span class="line"> <span class="kw">private</span>:</span><span class="line">    <span class="kw">int</span> left_, right_, top_, bottom_;   <span class="cm">// same as Platform</span></span><span class="line">    std::string state_;                 <span class="cm">// string-based state representation</span></span><span class="line">    <span class="kw">int</span>   timer_;</span><span class="line"> </span><span class="line">    <span class="kw">static const</span> std::vector&lt;std::vector&lt;<span class="kw">int</span>&gt;&gt; crumbling_texture_;</span><span class="line"> </span><span class="line">    <span class="kw">static const int</span> SHAKE_FRAMES   = <span class="num">60</span>;  <span class="cm">// 1.25 sec at 48 fps</span></span><span class="line">    <span class="kw">static const int</span> FALL_FRAMES    = <span class="num">30</span>;  <span class="cm">// 0.6 sec</span></span><span class="line">    <span class="kw">static const int</span> FALLEN_FRAMES  = <span class="num">96</span>;  <span class="cm">// 2 sec cooldown</span></span></pre>
+      </div>
+      <div class="note">
+        <strong>Frame counts = seconds × FPS.</strong> FPS is 48 (see
+        <code>main.cc</code>). So 1.25 sec = 60 frames, 2 sec = 96 frames.
+      </div>
+
+      <h3>Constructor</h3>
+      <p>Identical signature to <code>Platform</code> — copy it directly:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">crumbling.hh — constructor</span>
+        </div>
+        <pre><span class="line">    <span class="fn">Crumbling</span>(<span class="kw">int</span> left, <span class="kw">int</span> right, <span class="kw">int</span> top, <span class="kw">int</span> bottom)</span><span class="line">        : <span class="fn">left_</span>(left), <span class="fn">right_</span>(right), <span class="fn">top_</span>(top), <span class="fn">bottom_</span>(bottom),</span><span class="line">          <span class="fn">state_</span>(<span class="str">"normal"</span>), <span class="fn">timer_</span>(<span class="num">0</span>) {}</span></pre>
+      </div>
+
+      <h3><code>update()</code> — state machine</h3>
+      <p>
+        Called every frame. Each active state increments <code>timer_</code> and
+        transitions when its threshold is reached. <code>"normal"</code> has no
+        timer — it waits for <code>mario_on_top()</code>:
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">crumbling.hh — update</span>
+        </div>
+        <pre><span class="line">    <span class="kw">void</span> <span class="fn">update</span>() {</span><span class="line">        <span class="kw">if</span> (state_ == <span class="str">"shaking"</span>) {</span><span class="line">            timer_++;</span><span class="line">            <span class="kw">if</span> (timer_ &gt;= SHAKE_FRAMES) {</span><span class="line">                state_ = <span class="str">"falling"</span>;</span><span class="line">                timer_ = <span class="num">0</span>;</span><span class="line">            }</span><span class="line">        } <span class="kw">else if</span> (state_ == <span class="str">"falling"</span>) {</span><span class="line">            timer_++;</span><span class="line">            <span class="kw">if</span> (timer_ &gt;= FALL_FRAMES) {</span><span class="line">                state_ = <span class="str">"fallen"</span>;</span><span class="line">                timer_ = <span class="num">0</span>;</span><span class="line">            }</span><span class="line">        } <span class="kw">else if</span> (state_ == <span class="str">"fallen"</span>) {</span><span class="line">            timer_++;</span><span class="line">            <span class="kw">if</span> (timer_ &gt;= FALLEN_FRAMES) {</span><span class="line">                state_ = <span class="str">"normal"</span>;</span><span class="line">                timer_ = <span class="num">0</span>;</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span></pre>
+      </div>
+
+      <h3>Key public methods</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">crumbling.hh — public</span>
+        </div>
+        <pre><span class="line">    <span class="cm">// Called by game.cc when mario is standing on it</span></span><span class="line">    <span class="kw">void</span> <span class="fn">mario_on_top</span>() {</span><span class="line">        <span class="kw">if</span> (state_ == <span class="str">"normal"</span>) {</span><span class="line">            state_ = <span class="str">"shaking"</span>;</span><span class="line">            timer_ = <span class="num">0</span>;</span><span class="line">        }</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">bool</span> <span class="fn">is_solid</span>() <span class="kw">const</span> {</span><span class="line">        <span class="kw">return</span> state_ == <span class="str">"normal"</span> || state_ == <span class="str">"shaking"</span>;</span><span class="line">    }</span><span class="line"> </span><span class="line">    std::string <span class="fn">state</span>() <span class="kw">const</span> { <span class="kw">return</span> state_; }</span><span class="line">    <span class="kw">int</span> <span class="fn">top</span>() { <span class="kw">return</span> top_; }</span><span class="line"> </span><span class="line">    <span class="cm">// Returns empty rect when fallen — Finder and overlaps skip it automatically</span></span><span class="line">    pro2::Rect <span class="fn">get_rect</span>() <span class="kw">const</span> {</span><span class="line">        <span class="kw">if</span> (state_ == <span class="str">"fallen"</span>) <span class="kw">return</span> {<span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>};</span><span class="line">        <span class="kw">return</span> {left_, top_, right_, bottom_};</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">bool</span> <span class="fn">has_crossed_floor_downwards</span>(pro2::Pt plast, pro2::Pt pcurr) <span class="kw">const</span> {</span><span class="line">        <span class="kw">if</span> (!<span class="fn">is_solid</span>()) <span class="kw">return false</span>;</span><span class="line">        <span class="kw">return</span> (left_ &lt;= plast.x &amp;&amp; plast.x &lt;= right_) &amp;&amp;</span><span class="line">               (left_ &lt;= pcurr.x &amp;&amp; pcurr.x &lt;= right_) &amp;&amp;</span><span class="line">               (plast.y &lt;= top_   &amp;&amp; pcurr.y &gt;= top_);</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">void</span> <span class="fn">paint</span>(pro2::Window&amp; window) <span class="kw">const</span>;</span><span class="line">};</span><span class="line"> </span><span class="line"><span class="pp">#endif</span></span></pre>
+      </div>
+      <div class="note">
+        <strong><code>get_rect()</code> trick:</strong> returning
+        <code>{0,0,0,0}</code> when fallen means <code>overlaps()</code> with
+        any real rect returns false and <code>Finder::query()</code> won't find
+        it either — zero extra logic needed in <code>game.cc</code>.
+      </div>
+
+      <h2 id="crumbling-cc">2. crumbling.cc — Final File</h2>
+      <p>
+        The texture tiling loop in <code>paint</code> follows the exact same
+        pattern as <code>platform.cc</code> — copy it as a starting point. The
+        only additions are the <code>offset_x</code> wobble (shaking) and
+        <code>offset_y</code> drop (falling).
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">crumbling.cc</span>
+        </div>
+        <pre><span class="line"><span class="pp">#include</span> <span class="str">"crumbling.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">&lt;vector&gt;</span></span><span class="line"><span class="kw">using namespace</span> std;</span><span class="line"> </span><span class="line"><span class="kw">const int</span> _ = <span class="num">0</span>;           <span class="cm">// transparent</span></span><span class="line"><span class="kw">const int</span> r = pro2::red;</span><span class="line"><span class="kw">const int</span> y = pro2::yellow;</span><span class="line"><span class="kw">const int</span> w = pro2::white;</span><span class="line"> </span><span class="line"><span class="kw">const</span> vector&lt;vector&lt;<span class="kw">int</span>&gt;&gt; Crumbling::crumbling_texture_ = {</span><span class="line">    {w, w, w, w, w, w, _},</span><span class="line">    {w, y, y, w, y, y, _},</span><span class="line">    {y, y, r, y, y, r, _},</span><span class="line">    {_, _, _, _, _, _, _},</span><span class="line">    {w, w, _, w, w, w, _},</span><span class="line">    {y, y, y, _, y, y, y},</span><span class="line">    {y, r, y, y, _, r, y},</span><span class="line">    {_, _, _, _, _, _, _},</span><span class="line">};</span><span class="line"> </span><span class="line"><span class="kw">void</span> Crumbling::<span class="fn">paint</span>(pro2::Window&amp; window) <span class="kw">const</span> {</span><span class="line">    <span class="kw">if</span> (state_ == <span class="str">"fallen"</span>) <span class="kw">return</span>;</span><span class="line"> </span><span class="line">    <span class="kw">const int</span> txH = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(crumbling_texture_.<span class="fn">size</span>());</span><span class="line">    <span class="kw">const int</span> txW = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(crumbling_texture_[<span class="num">0</span>].<span class="fn">size</span>());</span><span class="line"> </span><span class="line">    <span class="cm">// shaking: alternate ±1px left/right every 2 frames</span></span><span class="line">    <span class="kw">int</span> offset_x = <span class="num">0</span>;</span><span class="line">    <span class="kw">if</span> (state_ == <span class="str">"shaking"</span>) {</span><span class="line">        offset_x = (timer_ % <span class="num">4</span> &lt; <span class="num">2</span>) ? <span class="num">1</span> : <span class="num">-1</span>;</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="cm">// falling: drop 4px per frame</span></span><span class="line">    <span class="kw">int</span> offset_y = <span class="num">0</span>;</span><span class="line">    <span class="kw">if</span> (state_ == <span class="str">"falling"</span>) {</span><span class="line">        offset_y = timer_ * <span class="num">4</span>;</span><span class="line">    }</span><span class="line"> </span><span class="line">    <span class="kw">for</span> (<span class="kw">int</span> i = top_ + <span class="num">1</span>; i &lt;= bottom_; i++) {</span><span class="line">        <span class="kw">for</span> (<span class="kw">int</span> j = left_; j &lt;= right_; j++) {</span><span class="line">            <span class="kw">int</span> color = crumbling_texture_[(i - top_ - <span class="num">1</span>) % txH][(j - left_) % txW];</span><span class="line">            <span class="kw">if</span> (color != <span class="num">0</span>) {</span><span class="line">                window.<span class="fn">set_pixel</span>({j + offset_x, i + offset_y}, color);</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line">}</span></pre>
+      </div>
+
+      <h2 id="game-hh">3. game.hh — Changes</h2>
+      <p>
+        Three additions following the existing <code>Platform</code> /
+        <code>Finder&lt;Platform&gt;</code> pattern:
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">game.hh</span>
+        </div>
+        <pre><span class="add"><span class="pp">#include</span> <span class="str">"crumbling.hh"</span></span><span class="line"> </span><span class="line"><span class="kw">class</span> <span class="fn">Game</span> {</span><span class="line">    Mario                  mario_;</span><span class="line">    std::vector&lt;Platform&gt;  platforms_;</span><span class="add">    std::vector&lt;Crumbling&gt; crumbling_platforms_;</span><span class="line">    <span class="kw">int</span>                    score_;</span><span class="line">    std::vector&lt;Coin&gt;      coins_;</span><span class="line">    Finder&lt;Platform&gt;       platform_finder_;</span><span class="line">    Finder&lt;Coin&gt;           coin_finder_;</span><span class="add">    Finder&lt;Crumbling&gt;      crumbling_finder_;</span><span class="line">    ...</span><span class="line">};</span></pre>
+      </div>
+      <div class="note">
+        <strong>Pattern:</strong> every new object type gets a
+        <code>std::vector&lt;T&gt;</code> to own the objects and a
+        <code>Finder&lt;T&gt;</code> for spatial queries. The vector must
+        outlive the finder since the finder stores raw pointers into it.
+      </div>
+
+      <h2 id="game-cc">4. game.cc — Changes</h2>
+
+      <h3>Constructor</h3>
+      <p>
+        The loop now branches: every 3rd platform (<code>i % 3 == 0</code>)
+        becomes a <code>Crumbling</code>. After the loop, all three finders are
+        registered.
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">game.cc — constructor</span>
+        </div>
+        <pre><span class="line"><span class="pp">#include</span> <span class="str">"crumbling.hh"</span>  <span class="cm">// new include</span></span><span class="line"> </span><span class="line">    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; <span class="num">20</span>; i++) {</span><span class="add">        <span class="kw">if</span> (i % <span class="num">3</span> == <span class="num">0</span>) {</span><span class="add">            crumbling_platforms_.<span class="fn">push_back</span>(<span class="fn">Crumbling</span>(<span class="num">250</span> + i*<span class="num">200</span>, <span class="num">400</span> + i*<span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="add">        } <span class="kw">else</span> {</span><span class="line">            platforms_.<span class="fn">push_back</span>(<span class="fn">Platform</span>(<span class="num">250</span> + i*<span class="num">200</span>, <span class="num">400</span> + i*<span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="add">        }</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span>,       <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> - <span class="num">60</span>,  <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> + <span class="num">60</span>,  <span class="num">140</span>}));</span><span class="line">    }</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; p  : platforms_)           platform_finder_.<span class="fn">add</span>(&amp;p);</span><span class="add">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; cp : crumbling_platforms_) crumbling_finder_.<span class="fn">add</span>(&amp;cp);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; c  : coins_)              coin_finder_.<span class="fn">add</span>(&amp;c);</span></pre>
+      </div>
+      <div class="warn">
+        <strong>Always register finders AFTER the loop.</strong> Calling
+        <code>push_back</code> can reallocate the vector, invalidating all
+        pointers. If you add <code>&amp;p</code> inside the loop and the vector
+        reallocates, you get dangling pointers.
+      </div>
+
+      <h3><code>update_objects</code> — two new blocks</h3>
+      <p>
+        <strong>Block 1</strong> (before <code>mario_.update</code>): feed solid
+        crumbling platforms into <code>nearby</code> as temporary
+        <code>Platform</code> objects — Mario's physics doesn't know about
+        <code>Crumbling</code>. <strong>Block 2</strong> (after
+        <code>mario_.update</code>): tick each crumbling platform and trigger
+        shaking if Mario is standing on it.
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">game.cc — update_objects</span>
+        </div>
+        <pre><span class="line"><span class="kw">void</span> Game::<span class="fn">update_objects</span>(pro2::Window&amp; window) {</span><span class="line">    std::vector&lt;Platform&gt; nearby;</span><span class="line">    Rect aux = mario_.<span class="fn">get_rect</span>();</span><span class="line">    aux.left -= <span class="num">480</span>; aux.right += <span class="num">480</span>;</span><span class="line">    aux.top  -= <span class="num">480</span>; aux.bottom += <span class="num">480</span>;</span><span class="line"> </span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(aux))</span><span class="line">        nearby.<span class="fn">push_back</span>(*p);</span><span class="line"> </span><span class="add">    <span class="kw">for</span> (Crumbling&amp; cp : crumbling_platforms_) {</span><span class="add">        <span class="kw">if</span> (cp.<span class="fn">is_solid</span>())</span><span class="add">            nearby.<span class="fn">push_back</span>(<span class="fn">Platform</span>(cp.<span class="fn">get_rect</span>().left, cp.<span class="fn">get_rect</span>().right,</span><span class="add">                                      cp.<span class="fn">top</span>(), cp.<span class="fn">top</span>() + <span class="num">11</span>));</span><span class="add">    }</span><span class="line"> </span><span class="line">    mario_.<span class="fn">update</span>(window, nearby);</span><span class="line"> </span><span class="add">    Rect mariorect = mario_.<span class="fn">get_rect</span>();</span><span class="add">    <span class="kw">for</span> (Crumbling&amp; cp : crumbling_platforms_) {</span><span class="add">        <span class="kw">if</span> (mario_.<span class="fn">is_grounded</span>() &amp;&amp; <span class="fn">overlaps</span>(mariorect, cp.<span class="fn">get_rect</span>()))</span><span class="add">            cp.<span class="fn">mario_on_top</span>();</span><span class="add">        cp.<span class="fn">update</span>();</span><span class="add">    }</span><span class="line"> </span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (Coin&amp; c : coins_) {</span><span class="line">        <span class="kw">if</span> (!c.<span class="fn">is_collected</span>() &amp;&amp; <span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), visible)) {</span><span class="line">            c.<span class="fn">update</span>(window.<span class="fn">frame_count</span>());</span><span class="line">            <span class="kw">if</span> (<span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), mariorect)) {</span><span class="line">                c.<span class="fn">collect</span>();</span><span class="line">                coin_finder_.<span class="fn">remove</span>(&amp;c);</span><span class="line">                std::cout &lt;&lt; <span class="str">"You have "</span> &lt;&lt; score_++ &lt;&lt; <span class="str">" coins.\n"</span>;</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line">}</span></pre>
+      </div>
+      <div class="note">
+        <strong>Order matters:</strong> call <code>mario_.update()</code> first
+        (so <code>is_grounded()</code> is fresh for this frame), then check
+        <code>mario_.is_grounded()</code> + <code>overlaps</code> to trigger
+        <code>mario_on_top()</code>, then call <code>cp.update()</code> to
+        advance the state machine.
+      </div>
+      <div class="note">
+        <strong>Why cast to <code>Platform</code>?</strong>
+        <code>mario_.update()</code> takes <code>vector&lt;Platform&gt;</code>.
+        Wrapping the crumbling rect as a temporary <code>Platform</code> reuses
+        existing physics without changing <code>Mario</code> or
+        <code>Platform</code>.
+      </div>
+
+      <h3><code>paint</code> — one new line</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">game.cc — paint</span>
+        </div>
+        <pre><span class="line"><span class="kw">void</span> Game::<span class="fn">paint</span>(pro2::Window&amp; window) {</span><span class="line">    window.<span class="fn">clear</span>(sky_blue);</span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p  : platform_finder_.<span class="fn">query</span>(visible))</span><span class="line">        p-&gt;<span class="fn">paint</span>(window);</span><span class="add">    <span class="kw">for</span> (<span class="kw">const</span> Crumbling* cp : crumbling_finder_.<span class="fn">query</span>(visible))</span><span class="add">        cp-&gt;<span class="fn">paint</span>(window);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Coin* c  : coin_finder_.<span class="fn">query</span>(visible))</span><span class="line">        c-&gt;<span class="fn">paint_coin</span>(window);</span><span class="line">    mario_.<span class="fn">paint</span>(window);</span><span class="line">}</span></pre>
+      </div>
+
+      <h2 id="game-cc-final">5. game.cc — Final File</h2>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span
+          ><span class="code-file">game.cc</span>
+        </div>
+        <pre><span class="line"><span class="pp">#include</span> <span class="str">"game.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"assert.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"coin.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"crumbling.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"geometry.hh"</span></span><span class="line"><span class="pp">#include</span> <span class="str">"platform.hh"</span></span><span class="line"><span class="kw">using namespace</span> pro2;</span><span class="line"> </span><span class="line">Game::<span class="fn">Game</span>(<span class="kw">int</span> width, <span class="kw">int</span> height)</span><span class="line">    : <span class="fn">mario_</span>({width / <span class="num">2</span>, <span class="num">150</span>}),</span><span class="line">      platforms_{</span><span class="line">          <span class="fn">Platform</span>(<span class="num">100</span>, <span class="num">300</span>, <span class="num">200</span>, <span class="num">211</span>),</span><span class="line">          <span class="fn">Platform</span>(<span class="num">0</span>, <span class="num">200</span>, <span class="num">250</span>, <span class="num">261</span>),</span><span class="line">          <span class="fn">Platform</span>(<span class="num">250</span>, <span class="num">400</span>, <span class="num">150</span>, <span class="num">161</span>),</span><span class="line">      },</span><span class="line">      <span class="fn">finished_</span>(<span class="kw">false</span>),</span><span class="line">      <span class="fn">score_</span>(<span class="num">1</span>) {</span><span class="line">    <span class="fn">assert</span>(width &gt; <span class="num">0</span> &amp;&amp; height &gt; <span class="num">0</span>, <span class="str">"L'amplada i l'alcada del joc han de ser positives."</span>);</span><span class="line">    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; <span class="num">20</span>; i++) {</span><span class="line">        <span class="kw">if</span> (i % <span class="num">3</span> == <span class="num">0</span>) {</span><span class="line">            crumbling_platforms_.<span class="fn">push_back</span>(<span class="fn">Crumbling</span>(<span class="num">250</span> + i*<span class="num">200</span>, <span class="num">400</span> + i*<span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="line">        } <span class="kw">else</span> {</span><span class="line">            platforms_.<span class="fn">push_back</span>(<span class="fn">Platform</span>(<span class="num">250</span> + i*<span class="num">200</span>, <span class="num">400</span> + i*<span class="num">200</span>, <span class="num">150</span>, <span class="num">161</span>));</span><span class="line">        }</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span>,       <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> - <span class="num">60</span>,  <span class="num">140</span>}));</span><span class="line">        coins_.<span class="fn">push_back</span>(<span class="fn">Coin</span>({<span class="num">250</span> + i * <span class="num">200</span> + <span class="num">60</span>,  <span class="num">140</span>}));</span><span class="line">    }</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; p  : platforms_)           platform_finder_.<span class="fn">add</span>(&amp;p);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; cp : crumbling_platforms_) crumbling_finder_.<span class="fn">add</span>(&amp;cp);</span><span class="line">    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; c  : coins_)              coin_finder_.<span class="fn">add</span>(&amp;c);</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">process_keys</span>(pro2::Window&amp; window) {</span><span class="line">    <span class="kw">if</span> (window.<span class="fn">is_key_down</span>(Keys::Escape)) {</span><span class="line">        finished_ = <span class="kw">true</span>;</span><span class="line">        <span class="kw">return</span>;</span><span class="line">    }</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="kw">void</span> Game::<span class="fn">update_objects</span>(pro2::Window&amp; window) {</span><span class="line">    std::vector&lt;Platform&gt; nearby;</span><span class="line">    Rect aux = mario_.<span class="fn">get_rect</span>();</span><span class="line">    aux.left -= <span class="num">480</span>; aux.right += <span class="num">480</span>;</span><span class="line">    aux.top  -= <span class="num">480</span>; aux.bottom += <span class="num">480</span>;</span><span class="line"> </span><span class="line">    <span class="kw">for</span> (<span class="kw">const</span> Platform* p : platform_finder_.<span class="fn">query</span>(aux))</span><span class="line">        nearby.<span class="fn">push_back</span>(*p);</span><span class="line"> </span><span class="line">    <span class="kw">for</span> (Crumbling&amp; cp : crumbling_platforms_) {</span><span class="line">        <span class="kw">if</span> (cp.<span class="fn">is_solid</span>())</span><span class="line">            nearby.<span class="fn">push_back</span>(<span class="fn">Platform</span>(cp.<span class="fn">get_rect</span>().left, cp.<span class="fn">get_rect</span>().right,</span><span class="line">                                      cp.<span class="fn">top</span>(), cp.<span class="fn">top</span>() + <span class="num">11</span>));</span><span class="line">    }</span><span class="line"> </span><span class="line">    mario_.<span class="fn">update</span>(window, nearby);</span><span class="line"> </span><span class="line">    Rect mariorect = mario_.<span class="fn">get_rect</span>();</span><span class="line">    <span class="kw">for</span> (Crumbling&amp; cp : crumbling_platforms_) {</span><span class="line">        <span class="kw">if</span> (mario_.<span class="fn">is_grounded</span>() &amp;&amp; <span class="fn">overlaps</span>(mariorect, cp.<span class="fn">get_rect</span>()))</span><span class="line">            cp.<span class="fn">mario_on_top</span>();</span><span class="line">        cp.<span class="fn">update</span>();</span><span class="line">    }</span><span class="line"> </span><span class="line">    Rect visible = window.<span class="fn">camera_rect</span>();</span><span class="line">    <span class="kw">for</span> (Coin&amp; c : coins_) {</span><span class="line">        <span class="kw">if</span> (!c.<span class="fn">is_collected</span>() &amp;&amp; <span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), visible)) {</span><span class="line">            c.<span class="fn">update</span>(window.<span class="fn">frame_count</span>());</span><span class="line">            if (<span class="fn">overlaps</span>(c.<span class="fn">get_rect</span>(), mariorect)) {</span><span class="line">                c.<span class="fn">collect</span>();</span><span class="line">                coin_finder_.<span class="fn">remove</span>(&amp;c);</span><span class="line">                std::cout &lt;&lt; <span class="str">"You have "</span> &lt;&lt; score_++ &lt;&lt; <span class="str">" coins.\n"</span>;</span><span class="line">            }</span><span class="line">        }</span><span class="line">    }</span><span class="line">}</span></pre>
+      </div>
+    </main>
+
+    <script>
+      const navItems = document.querySelectorAll(".nav-item");
+      const sections = document.querySelectorAll("h2[id], p[id]");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              navItems.forEach((n) => n.classList.remove("active"));
+              const active = document.querySelector(
+                `.nav-item[href="#${e.target.id}"]`,
+              );
+              if (active) active.classList.add("active");
+            }
+          });
+        },
+        { rootMargin: "-20% 0px -70% 0px" },
+      );
+      sections.forEach((s) => observer.observe(s));
+
+      navItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          navItems.forEach((n) => n.classList.remove("active"));
+          item.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>
