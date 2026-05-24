@@ -24,9 +24,13 @@ Each student implements their own feature to finish the game however they want.
 👉 **[asomid-cat.github.io/mariopro2](https://asomid-cat.github.io/mariopro2/)**
 
 ---
+## Socials
 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/asomid/) 
+[![Twitter/X](https://img.shields.io/badge/Twitter%2FX-%23000000.svg?logo=x&logoColor=white)](https://x.com/b3ak01)
+
+---
 ## Author
 
 [![GitHub](https://img.shields.io/badge/asomiD--cat-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/asomiD-cat/mariopro2)
-[![Twitter/X](https://img.shields.io/badge/b3ak01-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/b3ak01)
-[![LinkedIn](https://img.shields.io/badge/asomid-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/asomid/)
+
