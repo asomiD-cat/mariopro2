@@ -27,6 +27,6 @@ Each student implements their own feature to finish the game however they want.
 
 ## Author
 
-[![GitHub](https://img.shields.io/badge/GitHub-asomiD--cat-181717?style=flat&logo=github)](https://github.com/asomiD-cat/mariopro2)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-asomid-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/asomid/)
-[![X](https://img.shields.io/badge/X-b3ak01-000000?style=flat&logo=x)](https://x.com/b3ak01)
+[![GitHub](https://img.shields.io/badge/GitHub-asomiD--cat-181717?style=for-the-badge&logo=github)](https://github.com/asomiD-cat/mariopro2)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-asomid-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/asomid/)
+[![X](https://img.shields.io/badge/X-b3ak01-000000?style=for-the-badge&logo=x)](https://x.com/b3ak01)
