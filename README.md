@@ -4,7 +4,6 @@ A Mario-style platformer built in C++ for the PRO2 course at UPC.
 
 You run, jump, and collect coins across an endless procedurally generated level. The project was built incrementally across three mods, each adding a new feature on top of the previous one.
 
----
 
 ## The Mods
 
@@ -17,19 +16,17 @@ A spatial grid (`Finder<T>`) maps objects to grid cells so only the ones near th
 **Mod 3 — Personal Ending**
 Each student implements their own feature to finish the game however they want.
 
----
 
 ## Dev Notes
 
 👉 **[asomid-cat.github.io/mariopro2](https://asomid-cat.github.io/mariopro2/)**
 
----
 ## Socials
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/asomid/) 
 [![Twitter/X](https://img.shields.io/badge/Twitter%2FX-%23000000.svg?logo=x&logoColor=white)](https://x.com/b3ak01)
 
----
+
 ## Author
 
 [![GitHub](https://img.shields.io/badge/asomiD--cat-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/asomiD-cat/mariopro2)
